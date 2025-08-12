@@ -1,6 +1,6 @@
 from kivy.uix.screenmanager import Screen
 from kivy.factory import Factory
-from widgets.TrackVolume import TrackVolume
+from widgets.track_volume import TrackVolume
 from kivy.properties import BooleanProperty, StringProperty
 
 class ClipViewScreen(Screen):

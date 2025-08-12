@@ -1,7 +1,7 @@
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import StringProperty, ListProperty, NumericProperty
 from kivy.clock import Clock
-from widgets.ClipSlot import ClipSlot
+from widgets.clip_slot import ClipSlot
 
 class TrackChannel(BoxLayout):
     track_index = NumericProperty(0)

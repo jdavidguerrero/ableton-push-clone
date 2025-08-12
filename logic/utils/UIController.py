@@ -1,6 +1,6 @@
 from kivy.uix.floatlayout import FloatLayout
 from kivy.core.window import Window
-from widgets.TrackVolume import TrackVolume
+from widgets.track_volume import TrackVolume
 
 class UIController:
     def __init__(self, root_floatlayout):
