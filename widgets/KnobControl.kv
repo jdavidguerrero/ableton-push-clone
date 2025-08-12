@@ -1,0 +1,50 @@
+<KnobControl@BoxLayout>:
+    orientation: 'vertical'
+    size_hint: None, None
+    size: 60, 107
+    spacing: 2
+    canvas.before:
+        Color:
+            rgba: 0, 0, 0, 0  # Background transparent for now
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    # Top Value Label (e.g., 70 Hz)
+    Label:
+        id: knob_value
+        text: root.display_value
+        font_size: 16
+        size_hint_y: None
+        height: 19
+        color: 0.93, 0.93, 0.93, 1
+
+    # Knob Body (Ring + Dot Indicator)
+    RelativeLayout:
+        size_hint: None, None
+        size: 60, 60
+        canvas.before:
+            Color:
+                rgba: 0.17, 0.17, 0.17, 1
+            Ellipse:
+                pos: self.pos
+                size: self.size
+        Widget:
+            size_hint: None, None
+            size: 6, 6
+            pos: (self.parent.x + self.parent.width / 2 + root.indicator_offset_x,
+                  self.parent.y + self.parent.height / 2 + root.indicator_offset_y)
+            canvas:
+                Color:
+                    rgba: 0.85, 0.85, 0.85, 1
+                Ellipse:
+                    pos: self.pos
+                    size: self.size
+
+    # Label (e.g., "Filter")
+    Label:
+        text: root.knob_label
+        font_size: 13
+        size_hint_y: None
+        height: 16
+        color: 0.53, 0.53, 0.53, 1

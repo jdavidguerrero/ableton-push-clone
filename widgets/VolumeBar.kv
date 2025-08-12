@@ -1,0 +1,18 @@
+<VolumeBar@BoxLayout>:
+    size_hint: None, None
+    size: 60, 10
+    canvas.before:
+        Color:
+            rgba: 0.2, 0.2, 0.2, 1
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [10]
+        Color:
+            rgba: self.fill_color if hasattr(self, 'fill_color') else (0.14, 0.88, 1, 1)
+        RoundedRectangle:
+            pos: self.pos
+            size: [self.size[0]*self.value, self.size[1]]
+            radius: [10]
+    value: NumericProperty(0.5)
+    fill_color: ListProperty([0.14, 0.88, 1, 1])

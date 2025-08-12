@@ -1,0 +1,12 @@
+<IconButton>:
+    size_hint: None, None
+    size: 24, 24
+    # El color del icono depende del estado
+    color: self.tint_active if self.active else self.tint_inactive
+    # Para evitar el fondo del ButtonBehavior
+    canvas.before:
+        Color:
+            rgba: 0,0,0,0
+        Rectangle:
+            pos: self.pos
+            size: self.size

@@ -1,0 +1,84 @@
+#:import IconButton widgets.IconButton
+
+<StatusBar>:
+    orientation: 'horizontal'
+    size_hint_y: None
+    height: dp(30)
+    padding: [16, 0]
+    spacing: 24
+    canvas.before:
+        Color: 
+            rgba: 0.1, 0.1, 0.1, 1
+        Rectangle: 
+            pos: self.pos 
+            size: self.size
+        Color: 
+            rgba: 0.2, 0.2, 0.2, 1
+        Line: 
+            rectangle: (*self.pos, *self.size) 
+            width: 1
+
+    # Bloque izquierdo (texto)
+    BoxLayout:
+        size_hint_x: None
+        width: scene_label.texture_size[0] + track_label.texture_size[0] + bpm_label.texture_size[0] + 24*2
+        spacing: 24
+        Label:
+            id: scene_label
+            text: root.scene_text
+            font_size: 13
+            color: 1,1,1,1
+            size_hint_x: None
+            width: self.texture_size[0]
+        Label:
+            id: track_label
+            text: root.track_text
+            font_size: 13
+            color: 1,1,1,1
+            size_hint_x: None
+            width: self.texture_size[0]
+        Label:
+            id: bpm_label
+            text: root.bpm_text
+            font_size: 13
+            color: 1,1,1,1
+            size_hint_x: None
+            width: self.texture_size[0]
+
+    # Spacer para empujar los iconos a la derecha
+    Widget:
+
+    # Bloque derecho (iconos) – siempre pegados a la derecha
+    BoxLayout:
+        size_hint_x: None
+        width: 24*3 + 8*2      # 3 iconos de 24px con spacing=8
+        spacing: 8
+        padding: 0, 3          # centra verticalmente (ajusta si quieres)
+        IconButton:
+            id: play_btn
+            source: "assets/icons/play.png"
+            size_hint: None, None
+            size: 24, 24
+            color: self.tint_active if self.active else self.tint_inactive
+            active: True
+            on_release: root.on_action('play')
+        IconButton:
+            id: record_btn
+            source: "assets/icons/record.png"
+            size_hint: None, None
+            size: 24, 24
+            tint_active: 1, 0.25, 0.25, 1
+            color: self.tint_active if self.active else self.tint_inactive
+            on_release:
+                root.on_action('record')
+                self.active = not self.active
+        IconButton:
+            id: loop_btn
+            source: "assets/icons/loop.png"
+            size_hint: None, None
+            size: 24, 24
+            tint_active: 0.2, 1, 1, 1
+            color: self.tint_active if self.active else self.tint_inactive
+            on_release:
+                root.on_action('loop')
+                self.active = not self.active

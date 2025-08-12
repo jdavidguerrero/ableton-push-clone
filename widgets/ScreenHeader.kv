@@ -1,0 +1,39 @@
+<ScreenHeader>:
+    size_hint_y: None
+    height: 40
+    padding: [16, 10]
+    spacing: 10
+    orientation: 'horizontal'
+    canvas.before:
+        Color:
+            rgba: 0.2, 0.2, 0.2, 1  # Much brighter background for visibility
+        Rectangle:
+            pos: self.pos
+            size: self.size
+        # Add a more visible border
+        Color:
+            rgba: 0.5, 0.5, 0.5, 1
+        Line:
+            width: 3
+            rectangle: (*self.pos, *self.size)
+    Label:
+        id: view_label
+        text: root.title
+        size_hint_x: None
+        width: 84
+        color: 1, 1, 1, 1
+        font_size: 18
+        bold: True
+        halign: 'center'
+        valign: 'middle'
+        text_size: self.size
+    Label:
+        id: info_label
+        text: root.info
+        size_hint_x: None
+        width: 150
+        color: 1, 1, 1, 1
+        font_size: 14
+        halign: 'center'
+        valign: 'middle'
+        text_size: self.size

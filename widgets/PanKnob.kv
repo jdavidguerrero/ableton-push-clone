@@ -1,0 +1,26 @@
+<PanKnob@Widget>:
+    size_hint: None, None
+    size: 15, 15
+    value: NumericProperty(0)  # -1 = izquierda, 0 = centro, 1 = derecha
+    knob_color: ListProperty([0.3, 0.3, 0.3, 1])       # Color del knob
+    indicator_color: ListProperty([1, 1, 1, 1])        # Color del indicador
+
+    canvas:
+        # Fondo del knob
+        Color:
+            rgba: self.knob_color
+        Ellipse:
+            pos: self.pos
+            size: self.size
+
+        # Indicador rotatorio
+        PushMatrix
+        Rotate:
+            angle: (self.value + 1) * 135  # mapea -1 a 0°, 0 a 135°, 1 a 270°
+            origin: self.center
+        Color:
+            rgba: self.indicator_color
+        Ellipse:
+            pos: self.center_x - 2, self.center_y + self.height / 2.8
+            size: 4, 4
+        PopMatrix

@@ -1,0 +1,51 @@
+#:import TrackVolume widgets.TrackVolume
+#:import ClipGrid widgets.ClipGrid
+#:import ScreenHeader widgets.ScreenHeader
+#:import StatusBar widgets.StatusBar
+#:import NavigationBar widgets.NavigationBar
+
+<ClipViewScreen>:
+    # layout general de tu pantalla
+    BoxLayout:
+        orientation: 'vertical'
+        # GRID (704x270 aprox dentro de un Scroll si hace falta)
+        ScrollView:
+            size_hint_y: None
+            height: dp(270)
+            do_scroll_y: False
+            do_scroll_x: True
+            ClipGrid:
+                id: clip_grid
+
+        # Mixer (fila con TrackVolume del track enfocado o de varios)
+        ScrollView:
+            size_hint_y: None
+            height: dp(100)
+            do_scroll_y: False
+            do_scroll_x: True
+            BoxLayout:
+                id: mixer_row
+                size_hint: None, None
+                height: dp(95)
+                width: self.minimum_width
+                spacing: dp(6)
+        # Panel de mixer dinámico (aparece al tocar un TrackHeader)
+        BoxLayout:
+            id: mixer_panel
+            size_hint_y: None
+            height: dp(100)
+            opacity: 1 if root.mixer_visible else 0
+            disabled: not root.mixer_visible
+            padding: dp(8), 0
+            TrackVolume:
+                id: track_volume
+                # El set_params se llama desde Python
+                # Aquí podrías replicar varios si quieres ver varios a la vez
+
+        StatusBar:
+            scene_text: "Scene 1"
+            track_text: root.current_track_text
+            bpm_text: "BPM: 120"
+
+        NavigationBar:
+            selected_index: 0

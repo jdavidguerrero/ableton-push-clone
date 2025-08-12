@@ -1,0 +1,25 @@
+#:kivy 2.3.0
+#:import dp kivy.metrics.dp
+#:import Factory kivy.factory.Factory
+
+<TrackChannel>:
+    size_hint: None, None
+    width: dp(88)
+    height: dp(270)
+    orientation: 'vertical'
+    spacing: 0
+
+    # Header
+    TrackHeader:
+        track_index: root.track_index
+        track_name: root.track_name
+        color_rgba: root.color_rgba
+        on_release: root.parent and getattr(root.parent, 'open_mixer_for', lambda *a, **k: None)(root.track_index)
+
+    # Slots (12 filas de 20px)
+    BoxLayout:
+        id: slots_box
+        orientation: 'vertical'
+        size_hint: 1, None
+        height: dp(240)
+        spacing: 0

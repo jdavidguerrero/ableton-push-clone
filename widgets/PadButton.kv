@@ -1,0 +1,44 @@
+<PadButton@Button>:
+    size_hint: None, None
+    size: 76, 76
+    background_normal: ''
+    background_color: self.bg_color
+    border: (0, 0, 0, 0)
+    color: 1, 1, 1, 1
+    font_size: 16
+    bold: True
+    text: self.label_text
+    halign: 'center'
+    valign: 'middle'
+    text_size: self.size
+    radius: [8, 8, 8, 8]
+    # Custom Properties
+    label_text: StringProperty("C3")
+    state_type: StringProperty("Idle")  # Can be: Idle, On, Pressed, Muted
+    pad_type: StringProperty("Note")    # Can be: Note, Drum, Clip
+    on_state_type:
+        self.update_style()
+    on_pad_type:
+        self.update_style()
+
+    # Method to update style based on state and type
+    canvas.before:
+        Color:
+            rgba: self.bg_color
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [8]
+    on_release:
+        self.state_type = "Pressed"
+    on_press:
+        self.update_style()
+
+<PadButton>:
+    bg_color: (0.13, 0.13, 0.13, 1) if self.state_type == "Idle" and self.pad_type == "Note" else \
+              (0.17, 0.17, 0.17, 1) if self.state_type == "Idle" and self.pad_type == "Drum" else \
+              (1, 0.6, 0, 1) if self.state_type == "On" and self.pad_type == "Drum" else \
+              (0.22, 0.84, 0.43, 1) if self.state_type == "On" and self.pad_type == "Note" else \
+              (1, 0.72, 0.30, 1) if self.state_type == "Pressed" and self.pad_type == "Drum" else \
+              (0.36, 0.89, 0.51, 1) if self.state_type == "Pressed" and self.pad_type == "Clip" else \
+              (0.33, 0.33, 0.33, 1) if self.state_type == "Muted" else (0.13, 0.13, 0.13, 1)

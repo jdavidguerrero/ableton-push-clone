@@ -1,0 +1,10 @@
+<ToggleButtonCustom@Button>:
+    size_hint: None, None
+    size: 25, 15
+    state_on_color: ListProperty([1, 0.72, 0.30, 1])
+    state_off_color: ListProperty([0.3, 0.3, 0.3, 1])
+    state: 'off'
+    background_color: self.state_on_color if self.state == 'on' else self.state_off_color
+    font_size: 10
+    on_press:
+        self.state = 'off' if self.state == 'on' else 'on'

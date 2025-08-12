@@ -1,0 +1,114 @@
+#:kivy 2.3.0
+
+<TrackVolume>:
+    size_hint: None, None
+    width: dp(86)
+    height: dp(95)
+    orientation: 'vertical'
+    padding: dp(5), dp(5)
+    spacing: dp(4)
+    canvas.before:
+        Color:
+            rgba: (0.745, 0.745, 0.745, 1)
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(4),]
+
+    # Línea Volumen
+    BoxLayout:
+        size_hint: 1, None
+        height: dp(15)
+        spacing: dp(8)
+        Label:
+            text: "Vol"
+            color: 1,1,1,1
+            font_size: dp(10)
+            size_hint_x: None
+            width: dp(20)
+        Slider:
+            min: 0.0
+            max: 1.0
+            value: root.volume
+            on_value: root.volume = self.value
+
+    # Línea Pan
+    BoxLayout:
+        size_hint: 1, None
+        height: dp(20)
+        spacing: dp(6)
+        Label:
+            text: "Pan"
+            color: 1,1,1,1
+            font_size: dp(10)
+            size_hint_x: None
+            width: dp(22)
+        Slider:
+            min: -1.0
+            max: 1.0
+            value: root.pan
+            on_value: root.pan = self.value
+
+    # Sends A/B/C
+    BoxLayout:
+        size_hint: 1, None
+        height: dp(20)
+        spacing: dp(6)
+        Label:
+            text: "A"
+            color: 1,1,1,1
+            font_size: dp(10)
+            size_hint_x: None
+            width: dp(12)
+        Slider:
+            min: 0.0
+            max: 1.0
+            value: root.send_a
+            on_value: root.send_a = self.value
+        Label:
+            text: "B"
+            color: 1,1,1,1
+            font_size: dp(10)
+            size_hint_x: None
+            width: dp(12)
+        Slider:
+            min: 0.0
+            max: 1.0
+            value: root.send_b
+            on_value: root.send_b = self.value
+        Label:
+            text: "C"
+            color: 1,1,1,1
+            font_size: dp(10)
+            size_hint_x: None
+            width: dp(12)
+        Slider:
+            min: 0.0
+            max: 1.0
+            value: root.send_c
+            on_value: root.send_c = self.value
+
+    # Mute / Solo / Arm
+    BoxLayout:
+        size_hint: 1, None
+        height: dp(20)
+        spacing: dp(4)
+
+        Button:
+            text: "M"
+            font_size: dp(10)
+            background_normal: ''
+            background_color: (1, .72, .3, 1) if root.is_mute else (.2, .2, .2, 1)
+            on_release: root.is_mute = 0 if root.is_mute else 1
+        Button:
+            text: "S"
+            font_size: dp(10)
+            background_normal: ''
+            background_color: (0, .016, 1, 1) if root.is_solo else (.2, .2, .2, 1)
+            on_release: root.is_solo = 0 if root.is_solo else 1
+        Button:
+            text: "A"
+            font_size: dp(10)
+            background_normal: ''
+            background_color: (.298, .686, .314, 1) if root.is_arm else (.2, .2, .2, 1)
+            on_release: root.is_arm = 0 if root.is_arm else 1

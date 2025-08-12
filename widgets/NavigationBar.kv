@@ -1,0 +1,38 @@
+<NavigationBar>:
+    size_hint_y: None
+    height: dp(50)
+    orientation: 'horizontal'
+    spacing: 10
+    padding: [18, 10]
+    canvas.before:
+        Color:
+            rgba: 0.0705, 0.0705, 0.0705, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+        Color:
+            rgba: 0.1686, 0.1686, 0.1686, 1
+        Line:
+            width: 1
+            rectangle: (*self.pos, *self.size)
+
+    NavButton:
+        text: "Clip View"
+        icon_source: "assets/icons/clip.png"
+        active: True
+        on_release: root.set_active(0)
+
+    NavButton:
+        text: "Devices"
+        icon_source: "assets/icons/devices.png"
+        on_release: root.set_active(1)
+
+    NavButton:
+        text: "Note"
+        icon_source: "assets/icons/note.png"
+        on_release: root.set_active(2)
+
+    NavButton:
+        text: "Settings"
+        icon_source: "assets/icons/settings.png"
+        on_release: root.set_active(3)
