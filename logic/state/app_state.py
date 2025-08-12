@@ -2,8 +2,19 @@ from .models import AppStateModel, TrackState, ClipSlotState
 from ..bus import bus
 
 class AppState:
-    def __init__(self): self.m = AppStateModel()
-    def _emit(self, key, **data): bus.emit(f"state:{key}", data)
+    def __init__(self):
+        self.m = AppStateModel()
+
+    def _emit(self, key, **data):
+        """Proxy event emission through the global bus.
+
+        The previous implementation forwarded the ``data`` dictionary as a single
+        positional argument which meant subscribers received a dict instead of
+        the expected keyword arguments.  This made handlers such as
+        ``on_volume(track, value)`` fail with ``TypeError``.  Expanding ``data``
+        fixes the issue so callbacks receive named arguments.
+        """
+        bus.emit(f"state:{key}", **data)
 
     def init_project(self, tracks=8, scenes=8):
         self.m.scenes_count = scenes
