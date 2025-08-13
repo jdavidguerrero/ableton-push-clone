@@ -4,7 +4,7 @@ from typing import Callable, Dict, Any, Optional, Tuple
 from pythonosc import osc
 from pythonosc.udp_client import SimpleUDPClient
 from pythonosc.dispatcher import Dispatcher
-from pythonosc.server import BlockingOSCUDPServer
+from pythonosc.osc_server import BlockingOSCUDPServer
 import time
 
 class OSCClient:

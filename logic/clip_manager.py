@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict
 from logic.bus import bus
 from kivy.clock import Clock
 import logging
