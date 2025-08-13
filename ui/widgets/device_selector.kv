@@ -3,10 +3,10 @@
 
 <DeviceSelector@BoxLayout>:
     size_hint_y: None
-    height: dp(60)
+    height: dp(40)  # REDUCIDO de 60 a 40
     orientation: 'horizontal'
-    padding: dp(66), dp(15)
-    spacing: dp(20)
+    padding: dp(66), dp(8)  # REDUCIDO padding vertical de 15 a 8
+    spacing: dp(15)  # REDUCIDO spacing de 20 a 15
     
     # Properties
     current_device: "Kick"
@@ -26,52 +26,54 @@
             points: [self.x, self.y, self.right, self.y]
             width: 1
     
-    # Previous device button - FIXED
+    # Previous device button - MÁS PEQUEÑO
     Button:
         text: "<"
         size_hint: None, None
-        size: dp(40), dp(30)
+        size: dp(30), dp(22)  # REDUCIDO de 40x30 a 30x22
         background_color: 0.15, 0.15, 0.15, 1
         color: 0.7, 0.7, 0.7, 1
+        font_size: dp(12)  # REDUCIDO de 16 a 12
         on_release: app.root.current_screen.previous_device() if hasattr(app.root.current_screen, 'previous_device') else None
     
-    # Current device display
+    # Current device display - MÁS COMPACTO
     BoxLayout:
         orientation: 'vertical'
-        spacing: dp(2)
+        spacing: dp(1)  # REDUCIDO de 2 a 1
         
         Label:
             text: "Device"
-            font_size: dp(10)
+            font_size: dp(8)  # REDUCIDO de 10 a 8
             color: 0.6, 0.6, 0.6, 1
             size_hint_y: None
-            height: dp(12)
+            height: dp(9)  # REDUCIDO de 12 a 9
         
         Label:
             text: root.current_device
-            font_size: dp(16)
+            font_size: dp(13)  # REDUCIDO de 16 a 13
             color: 1, 1, 1, 1
             bold: True
             size_hint_y: None
-            height: dp(20)
+            height: dp(16)  # REDUCIDO de 20 a 16
     
-    # Device type indicator
+    # Device type indicator - MÁS PEQUEÑO
     Widget:
         size_hint_x: None
-        width: dp(8)
+        width: dp(6)  # REDUCIDO de 8 a 6
         canvas:
             Color:
                 rgba: (0.22, 0.84, 0.44, 1) if "Serum" in root.current_device else (0.15, 0.5, 1.0, 1)
             RoundedRectangle:
-                pos: self.x + dp(2), self.y + dp(8)
-                size: dp(4), dp(14)
-                radius: [dp(2)]
+                pos: self.x + dp(1), self.y + dp(6)  # AJUSTADO posición
+                size: dp(3), dp(10)  # REDUCIDO de 4x14 a 3x10
+                radius: [dp(1)]  # REDUCIDO radius
     
-    # Next device button - FIXED
+    # Next device button - MÁS PEQUEÑO
     Button:
         text: ">"
         size_hint: None, None
-        size: dp(40), dp(30)
+        size: dp(30), dp(22)  # REDUCIDO de 40x30 a 30x22
         background_color: 0.15, 0.15, 0.15, 1
         color: 0.7, 0.7, 0.7, 1
+        font_size: dp(12)  # REDUCIDO de 16 a 12
         on_release: app.root.current_screen.next_device() if hasattr(app.root.current_screen, 'next_device') else None

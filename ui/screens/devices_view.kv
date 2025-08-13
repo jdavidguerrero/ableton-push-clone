@@ -12,7 +12,7 @@
             title: "Device View"
             info: root.current_track_name + " - " + root.current_device_name + " (Page " + str(root.current_page) + "/" + str(root.total_pages) + ")"
         
-        # NEW: Track Selector (◀◀ Track 1 ▶▶)
+        # NEW: Track Selector (◀◀ Track 1 ▶▶) - MÁS COMPACTO
         TrackSelector:
             id: track_selector
             current_track: root.current_track
@@ -20,18 +20,18 @@
             total_tracks: root.total_tracks
             on_current_track: root.current_track = self.current_track
         
-        # Device Selector (< Kick >)
+        # Device Selector (< Kick >) - MÁS COMPACTO
         DeviceSelector:
             id: device_selector
             current_device: root.current_device_name
             on_current_device: root.current_device_name = self.current_device
         
-        # Main Knob Bank Area
+        # Main Knob Bank Area - MÁS ESPACIO
         BoxLayout:
             id: knob_grid
             orientation: 'vertical'
-            padding: dp(66), dp(10)
-            spacing: dp(20)
+            padding: dp(66), dp(5)  # REDUCIDO padding vertical de 10 a 5
+            spacing: dp(15)  # REDUCIDO spacing de 20 a 15
             
             # First row of knobs (Encoders 1-4)
             BoxLayout:
