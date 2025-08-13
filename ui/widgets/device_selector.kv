@@ -1,0 +1,77 @@
+#:kivy 2.3.0
+#:import dp kivy.metrics.dp
+
+<DeviceSelector@BoxLayout>:
+    size_hint_y: None
+    height: dp(60)
+    orientation: 'horizontal'
+    padding: dp(66), dp(15)
+    spacing: dp(20)
+    
+    # Properties
+    current_device: "Kick"
+    available_devices: ["Kick", "Serum", "Reverb", "EQ"]
+    device_index: 0
+    
+    canvas.before:
+        Color:
+            rgba: 0.08, 0.08, 0.08, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+        # Bottom border
+        Color:
+            rgba: 0.2, 0.2, 0.2, 1
+        Line:
+            points: [self.x, self.y, self.right, self.y]
+            width: 1
+    
+    # Previous device button
+    Button:
+        text: "<"
+        size_hint: None, None
+        size: dp(40), dp(30)
+        background_color: 0.15, 0.15, 0.15, 1
+        color: 0.7, 0.7, 0.7, 1
+        on_release: root.previous_device()
+    
+    # Current device display
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: dp(2)
+        
+        Label:
+            text: "Device"
+            font_size: dp(10)
+            color: 0.6, 0.6, 0.6, 1
+            size_hint_y: None
+            height: dp(12)
+        
+        Label:
+            text: root.current_device
+            font_size: dp(16)
+            color: 1, 1, 1, 1
+            bold: True
+            size_hint_y: None
+            height: dp(20)
+    
+    # Device type indicator
+    Widget:
+        size_hint_x: None
+        width: dp(8)
+        canvas:
+            Color:
+                rgba: (0.22, 0.84, 0.44, 1) if "Serum" in root.current_device else (0.15, 0.5, 1.0, 1)
+            RoundedRectangle:
+                pos: self.x + dp(2), self.y + dp(8)
+                size: dp(4), dp(14)
+                radius: [dp(2)]
+    
+    # Next device button
+    Button:
+        text: ">"
+        size_hint: None, None
+        size: dp(40), dp(30)
+        background_color: 0.15, 0.15, 0.15, 1
+        color: 0.7, 0.7, 0.7, 1
+        on_release: root.next_device()

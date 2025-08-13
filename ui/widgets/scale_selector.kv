@@ -1,0 +1,26 @@
+#:kivy 2.3.0
+#:import dp kivy.metrics.dp
+
+<ScaleSelector@Button>:
+    size_hint: None, None
+    size: dp(354), dp(48)
+    background_normal: ''
+    background_color: 0.4, 0.4, 0.4, 1
+    
+    # Properties
+    current_scale: "Minor"
+    
+    canvas.before:
+        Color:
+            rgba: self.background_color
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(8)]
+    
+    text: "Scale: " + self.current_scale
+    font_size: dp(16)
+    bold: True
+    color: 1, 1, 1, 1
+    halign: 'center'
+    valign: 'middle'

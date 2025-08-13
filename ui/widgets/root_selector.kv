@@ -1,0 +1,28 @@
+#:kivy 2.3.0
+#:import dp kivy.metrics.dp
+
+<RootSelector@Button>:
+    size_hint: None, None
+    size: dp(274), dp(48)
+    background_normal: ''
+    background_color: 0.4, 0.4, 0.4, 1
+    
+    # Properties
+    current_root: "C#"
+    available_roots: ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+    
+    canvas.before:
+        Color:
+            rgba: self.background_color
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(8)]
+    
+    text: "Root: " + self.current_root
+    font_size: dp(16)
+    bold: True
+    color: 1, 1, 1, 1
+    halign: 'center'
+    valign: 'middle'
+    on_release: root.cycle_root()

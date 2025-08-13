@@ -1,0 +1,293 @@
+#:kivy 2.3.0
+#:import dp kivy.metrics.dp
+
+<SettingsViewScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: 0
+        
+        # Screen Header
+        ScreenHeader:
+            id: screen_header
+            title: "Settings"
+            info: "Clone Push / 1.0.1"
+        
+        # Main Content Area
+        ScrollView:
+            do_scroll_x: False
+            do_scroll_y: True
+            
+            BoxLayout:
+                orientation: 'vertical'
+                padding: dp(40), dp(30)
+                spacing: dp(20)
+                size_hint_y: None
+                height: self.minimum_height
+                
+                # MIDI Channel Selector
+                BoxLayout:
+                    size_hint_y: None
+                    height: dp(70)
+                    orientation: 'horizontal'
+                    padding: dp(20), dp(15)
+                    spacing: dp(20)
+                    canvas.before:
+                        Color:
+                            rgba: 0.28, 0.28, 0.28, 1
+                        RoundedRectangle:
+                            pos: self.pos
+                            size: self.size
+                            radius: [dp(12)]
+                        Color:
+                            rgba: 0.4, 0.4, 0.4, 1
+                        Line:
+                            rounded_rectangle: (*self.pos, *self.size, dp(12))
+                            width: 1
+                    
+                    Label:
+                        text: "MIDI Channel Selector"
+                        font_size: dp(16)
+                        bold: True
+                        color: 0.95, 0.95, 0.95, 1
+                        halign: 'left'
+                        valign: 'middle'
+                        text_size: self.size
+                    
+                    BoxLayout:
+                        size_hint_x: None
+                        width: dp(140)
+                        orientation: 'horizontal'
+                        spacing: dp(8)
+                        
+                        Button:
+                            text: "<"
+                            size_hint: None, None
+                            size: dp(35), dp(35)
+                            background_normal: ''
+                            background_color: 0.15, 0.15, 0.15, 1
+                            color: 0.9, 0.9, 0.9, 1
+                            font_size: dp(16)
+                            bold: True
+                            on_release: root.previous_midi_channel()
+                            canvas.before:
+                                Color:
+                                    rgba: self.background_color
+                                RoundedRectangle:
+                                    pos: self.pos
+                                    size: self.size
+                                    radius: [dp(6)]
+                                Color:
+                                    rgba: 0.35, 0.35, 0.35, 1
+                                Line:
+                                    rounded_rectangle: (*self.pos, *self.size, dp(6))
+                                    width: 1
+                        
+                        Widget:
+                            size_hint_x: None
+                            width: dp(50)
+                            canvas:
+                                Color:
+                                    rgba: 0.12, 0.12, 0.12, 1
+                                RoundedRectangle:
+                                    pos: self.pos
+                                    size: self.size
+                                    radius: [dp(6)]
+                                Color:
+                                    rgba: 0.3, 0.3, 0.3, 1
+                                Line:
+                                    rounded_rectangle: (*self.pos, *self.size, dp(6))
+                                    width: 1
+                            
+                            Label:
+                                text: str(root.midi_channel)
+                                font_size: dp(18)
+                                bold: True
+                                color: 1, 1, 1, 1
+                                halign: 'center'
+                                valign: 'middle'
+                                pos: self.parent.pos
+                                size: self.parent.size
+                        
+                        Button:
+                            text: ">"
+                            size_hint: None, None
+                            size: dp(35), dp(35)
+                            background_normal: ''
+                            background_color: 0.15, 0.15, 0.15, 1
+                            color: 0.9, 0.9, 0.9, 1
+                            font_size: dp(16)
+                            bold: True
+                            on_release: root.next_midi_channel()
+                            canvas.before:
+                                Color:
+                                    rgba: self.background_color
+                                RoundedRectangle:
+                                    pos: self.pos
+                                    size: self.size
+                                    radius: [dp(6)]
+                                Color:
+                                    rgba: 0.35, 0.35, 0.35, 1
+                                Line:
+                                    rounded_rectangle: (*self.pos, *self.size, dp(6))
+                                    width: 1
+                
+                # OSC IP Address Field - EDITABLE
+                BoxLayout:
+                    size_hint_y: None
+                    height: dp(70)
+                    orientation: 'horizontal'
+                    padding: dp(20), dp(15)
+                    spacing: dp(20)
+                    canvas.before:
+                        Color:
+                            rgba: 0.28, 0.28, 0.28, 1
+                        RoundedRectangle:
+                            pos: self.pos
+                            size: self.size
+                            radius: [dp(12)]
+                        Color:
+                            rgba: 0.4, 0.4, 0.4, 1
+                        Line:
+                            rounded_rectangle: (*self.pos, *self.size, dp(12))
+                            width: 1
+                    
+                    Label:
+                        text: "OSC IP Address Field"
+                        font_size: dp(16)
+                        bold: True
+                        color: 0.95, 0.95, 0.95, 1
+                        halign: 'left'
+                        valign: 'middle'
+                        text_size: self.size
+                    
+                    # EDITABLE IP Input
+                    TextInput:
+                        id: osc_ip_input
+                        text: root.osc_ip
+                        size_hint_x: None
+                        width: dp(150)
+                        height: dp(35)
+                        background_normal: ''
+                        background_active: ''
+                        background_color: 0.12, 0.12, 0.12, 1
+                        foreground_color: 0.9, 0.9, 0.9, 1
+                        cursor_color: 0.22, 0.84, 0.43, 1  # Green cursor
+                        selection_color: 0.22, 0.84, 0.43, 0.3  # Green selection
+                        font_size: dp(14)
+                        halign: 'center'
+                        multiline: False
+                        on_text: root.on_osc_ip_change(self, self.text)
+                        canvas.before:
+                            Color:
+                                rgba: 0.12, 0.12, 0.12, 1
+                            RoundedRectangle:
+                                pos: self.pos
+                                size: self.size
+                                radius: [dp(6)]
+                            Color:
+                                rgba: 0.3, 0.3, 0.3, 1
+                            Line:
+                                rounded_rectangle: (*self.pos, *self.size, dp(6))
+                                width: 1
+                
+                # OSC Port Field - EDITABLE
+                BoxLayout:
+                    size_hint_y: None
+                    height: dp(70)
+                    orientation: 'horizontal'
+                    padding: dp(20), dp(15)
+                    spacing: dp(20)
+                    canvas.before:
+                        Color:
+                            rgba: 0.28, 0.28, 0.28, 1
+                        RoundedRectangle:
+                            pos: self.pos
+                            size: self.size
+                            radius: [dp(12)]
+                        Color:
+                            rgba: 0.4, 0.4, 0.4, 1
+                        Line:
+                            rounded_rectangle: (*self.pos, *self.size, dp(12))
+                            width: 1
+                    
+                    Label:
+                        text: "OSC Port Field"
+                        font_size: dp(16)
+                        bold: True
+                        color: 0.95, 0.95, 0.95, 1
+                        halign: 'left'
+                        valign: 'middle'
+                        text_size: self.size
+                    
+                    # EDITABLE Port Input
+                    TextInput:
+                        id: osc_port_input
+                        text: str(root.osc_port)
+                        size_hint_x: None
+                        width: dp(150)
+                        height: dp(35)
+                        background_normal: ''
+                        background_active: ''
+                        background_color: 0.12, 0.12, 0.12, 1
+                        foreground_color: 0.9, 0.9, 0.9, 1
+                        cursor_color: 0.22, 0.84, 0.43, 1  # Green cursor
+                        selection_color: 0.22, 0.84, 0.43, 0.3  # Green selection
+                        font_size: dp(14)
+                        halign: 'center'
+                        multiline: False
+                        input_filter: 'int'  # Only allow integers
+                        on_text: root.on_osc_port_change(self, self.text)
+                        canvas.before:
+                            Color:
+                                rgba: 0.12, 0.12, 0.12, 1
+                            RoundedRectangle:
+                                pos: self.pos
+                                size: self.size
+                                radius: [dp(6)]
+                            Color:
+                                rgba: 0.3, 0.3, 0.3, 1
+                            Line:
+                                rounded_rectangle: (*self.pos, *self.size, dp(6))
+                                width: 1
+                
+                # Spacer
+                Widget:
+                    size_hint_y: None
+                    height: dp(20)
+                
+                # Save Button - Centered
+                BoxLayout:
+                    size_hint_y: None
+                    height: dp(60)
+                    
+                    Widget:  # Left spacer
+                    
+                    Button:
+                        text: "SAVE"
+                        size_hint: None, None
+                        size: dp(180), dp(50)
+                        background_normal: ''
+                        background_color: 0.22, 0.84, 0.43, 1
+                        color: 1, 1, 1, 1
+                        font_size: dp(16)
+                        bold: True
+                        on_release: root.save_settings()
+                        canvas.before:
+                            Color:
+                                rgba: self.background_color
+                            RoundedRectangle:
+                                pos: self.pos
+                                size: self.size
+                                radius: [dp(10)]
+                            Color:
+                                rgba: 0.15, 0.6, 0.3, 0.3
+                            RoundedRectangle:
+                                pos: self.x, self.y - dp(2)
+                                size: self.size
+                                radius: [dp(10)]
+                    
+                    Widget:  # Right spacer
+        
+        # Navigation Bar
+        NavigationBar:
+            selected_index: 3

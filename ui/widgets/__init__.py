@@ -6,3 +6,6 @@ from .nav_button import NavButton
 from .clip_slot import ClipSlot
 from .track_header import TrackHeader
 from .track_volume import TrackVolume
+from .icon_button import IconButton
+from .clip_grid import ClipGrid
+from .track_channel import TrackChannel

@@ -1,0 +1,65 @@
+#:kivy 2.3.0
+#:import dp kivy.metrics.dp
+
+<OctaveSelector@BoxLayout>:
+    size_hint: None, None
+    size: dp(150), dp(48)
+    orientation: 'horizontal'
+    spacing: dp(8)
+    
+    # Properties
+    current_octave: 4
+    octave_text: "OCT"
+    
+    Button:
+        text: "<"
+        size_hint: None, None
+        size: dp(40), dp(48)
+        background_normal: ''
+        background_color: 0.3, 0.3, 0.3, 1
+        color: 0.8, 0.8, 0.8, 1
+        font_size: dp(16)
+        bold: True
+        on_release: root.decrease_octave()
+        canvas.before:
+            Color:
+                rgba: self.background_color
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(8)]
+    
+    Button:
+        text: root.octave_text
+        size_hint: None, None
+        size: dp(70), dp(48)
+        background_normal: ''
+        background_color: 0.4, 0.4, 0.4, 1
+        color: 1, 1, 1, 1
+        font_size: dp(16)
+        bold: True
+        canvas.before:
+            Color:
+                rgba: self.background_color
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(8)]
+    
+    Button:
+        text: ">"
+        size_hint: None, None
+        size: dp(40), dp(48)
+        background_normal: ''
+        background_color: 0.3, 0.3, 0.3, 1
+        color: 0.8, 0.8, 0.8, 1
+        font_size: dp(16)
+        bold: True
+        on_release: root.increase_octave()
+        canvas.before:
+            Color:
+                rgba: self.background_color
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(8)]

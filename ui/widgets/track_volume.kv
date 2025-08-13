@@ -1,140 +1,150 @@
 #:kivy 2.3.0
+#:import dp kivy.metrics.dp
 
 <TrackVolume>:
     size_hint: None, None
-    width: dp(86)
-    height: dp(110)  # Slightly taller for better spacing
+    width: dp(88)  # Increased width to match track width exactly
+    height: dp(90)
     orientation: 'vertical'
-    padding: dp(6), dp(6)
-    spacing: dp(6)  # More consistent spacing
+    padding: dp(3), dp(3)  # Reduced padding to fit better
+    spacing: dp(2)  # Tight spacing
     canvas.before:
         Color:
-            rgba: (0.15, 0.15, 0.15, 1)  # Darker, more modern background
+            rgba: (0.12, 0.12, 0.12, 1)
         RoundedRectangle:
             pos: self.pos
             size: self.size
-            radius: [dp(6),]  # Slightly more rounded
+            radius: [dp(4),]
 
-    # Volume Section
+    # Volume fader - HORIZONTAL with proper sizing
     BoxLayout:
         size_hint: 1, None
-        height: dp(18)
-        spacing: dp(6)
+        height: dp(18)  # Reduced height
+        spacing: dp(3)  # Tight spacing
+        orientation: 'horizontal'
+        
         Label:
             text: "VOL"
             color: 0.8, 0.8, 0.8, 1
-            font_size: dp(9)
+            font_size: dp(7)  # Smaller font
             bold: True
             size_hint_x: None
-            width: dp(24)
+            width: dp(20)  # Reduced width
+            halign: 'center'
+            valign: 'middle'
+        
         Slider:
             min: 0.0
             max: 1.0
             value: root.volume
+            orientation: 'horizontal'
             on_value: root.volume = self.value
-            cursor_size: dp(12), dp(12)  # Larger cursor
+            cursor_size: dp(8), dp(12)  # Smaller cursor
 
-    # Pan Section - Centered slider for better UX
+    # Pan knob - centered with proper spacing
     BoxLayout:
         size_hint: 1, None
-        height: dp(18)
-        spacing: dp(6)
-        Label:
-            text: "PAN"
-            color: 0.8, 0.8, 0.8, 1
-            font_size: dp(9)
-            bold: True
+        height: dp(22)  # Compact height
+        
+        Widget:
+            size_hint_x: 0.3
+        
+        BoxLayout:
+            orientation: 'vertical'
             size_hint_x: None
-            width: dp(24)
-        Slider:
-            min: -1.0
-            max: 1.0
-            value: root.pan
-            on_value: root.pan = self.value
-            cursor_size: dp(12), dp(12)
-            # Visual center indicator could be added here
+            width: dp(20)
+            spacing: dp(1)
+            
+            MixerKnob:
+                value: (root.pan + 1) / 2
+                on_touch_down: 
+                    if self.collide_point(*args[1].pos): \
+                    root.pan = (self.value * 2) - 1
+            
+            Label:
+                text: "PAN"
+                font_size: dp(6)
+                color: 0.7, 0.7, 0.7, 1
+                size_hint_y: None
+                height: dp(8)
+                halign: 'center'
+        
+        Widget:
+            size_hint_x: 0.3
 
-    # Sends Section - Improved layout
+    # Sends knobs - with labels below
     BoxLayout:
         size_hint: 1, None
-        height: dp(22)
-        spacing: dp(4)
-        Label:
-            text: "SENDS"
-            color: 0.7, 0.7, 0.7, 1
-            font_size: dp(8)
-            size_hint_x: None
-            width: dp(76)
-            halign: 'center'
-    
-    BoxLayout:
-        size_hint: 1, None
-        height: dp(18)
+        height: dp(22)  # Compact height
         spacing: dp(2)
+        padding: dp(2), 0
         
         # Send A
         BoxLayout:
             orientation: 'vertical'
-            spacing: dp(2)
+            spacing: dp(1)
+            
+            MixerKnob:
+                value: root.send_a
+                on_touch_down:
+                    if self.collide_point(*args[1].pos): \
+                    root.send_a = self.value
+            
             Label:
                 text: "A"
-                color: 0.8, 0.8, 0.8, 1
-                font_size: dp(9)
+                font_size: dp(6)
+                color: 0.7, 0.7, 0.7, 1
                 size_hint_y: None
-                height: dp(12)
-            Slider:
-                min: 0.0
-                max: 1.0
-                value: root.send_a
-                on_value: root.send_a = self.value
-                orientation: 'vertical'
-                cursor_size: dp(8), dp(8)
+                height: dp(8)
+                halign: 'center'
         
         # Send B
         BoxLayout:
             orientation: 'vertical'
-            spacing: dp(2)
+            spacing: dp(1)
+            
+            MixerKnob:
+                value: root.send_b
+                on_touch_down:
+                    if self.collide_point(*args[1].pos): \
+                    root.send_b = self.value
+            
             Label:
                 text: "B"
-                color: 0.8, 0.8, 0.8, 1
-                font_size: dp(9)
+                font_size: dp(6)
+                color: 0.7, 0.7, 0.7, 1
                 size_hint_y: None
-                height: dp(12)
-            Slider:
-                min: 0.0
-                max: 1.0
-                value: root.send_b
-                on_value: root.send_b = self.value
-                orientation: 'vertical'
-                cursor_size: dp(8), dp(8)
+                height: dp(8)
+                halign: 'center'
         
         # Send C
         BoxLayout:
             orientation: 'vertical'
-            spacing: dp(2)
+            spacing: dp(1)
+            
+            MixerKnob:
+                value: root.send_c
+                on_touch_down:
+                    if self.collide_point(*args[1].pos): \
+                    root.send_c = self.value
+            
             Label:
                 text: "C"
-                color: 0.8, 0.8, 0.8, 1
-                font_size: dp(9)
+                font_size: dp(6)
+                color: 0.7, 0.7, 0.7, 1
                 size_hint_y: None
-                height: dp(12)
-            Slider:
-                min: 0.0
-                max: 1.0
-                value: root.send_c
-                on_value: root.send_c = self.value
-                orientation: 'vertical'
-                cursor_size: dp(8), dp(8)
+                height: dp(8)
+                halign: 'center'
 
-    # Mute / Solo / Arm - Improved spacing and colors
+    # Mute / Solo / Arm - compact
     BoxLayout:
         size_hint: 1, None
-        height: dp(24)
-        spacing: dp(3)
+        height: dp(18)  # Reduced height
+        spacing: dp(2)  # Tight spacing
 
         Button:
             text: "M"
-            font_size: dp(11)
+            font_size: dp(8)  # Smaller font
             bold: True
             background_normal: ''
             background_color: (1, 0.6, 0.2, 1) if root.is_mute else (0.25, 0.25, 0.25, 1)
@@ -143,7 +153,7 @@
             
         Button:
             text: "S"
-            font_size: dp(11)
+            font_size: dp(8)
             bold: True
             background_normal: ''
             background_color: (0.2, 0.6, 1, 1) if root.is_solo else (0.25, 0.25, 0.25, 1)
@@ -152,7 +162,7 @@
             
         Button:
             text: "A"
-            font_size: dp(11)
+            font_size: dp(8)
             bold: True
             background_normal: ''
             background_color: (0.2, 0.8, 0.4, 1) if root.is_arm else (0.25, 0.25, 0.25, 1)

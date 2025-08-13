@@ -18,7 +18,11 @@ from kivy.resources import resource_add_path
 from config.config import AppConfig
 from logic.state.app_state import AppState
 from logic.clip_manager import ClipManager
+
 from ui.screens.clip_view import ClipViewScreen
+from ui.screens.devices_view import DevicesViewScreen
+from ui.screens.note_view import NoteViewScreen
+from ui.screens.settings_view import SettingsViewScreen
 
 # IMPORTANT: Import ALL widget classes BEFORE loading KV files
 from ui.widgets.clip_grid import ClipGrid
@@ -31,6 +35,8 @@ from ui.widgets.clip_slot import ClipSlot
 from ui.widgets.track_header import TrackHeader
 from ui.widgets.track_channel import TrackChannel
 from ui.widgets.icon_button import IconButton
+
+
 
 class PushControllerApp(App):
     def __init__(self, **kwargs):
@@ -108,10 +114,9 @@ class PushControllerApp(App):
     
     def _create_ui(self):
         """Create user interface"""
-        # ScreenManager as root (cleaner architecture)
         sm = ScreenManager()
         
-        # Inject dependencies into screens
+        # Clip View (default)
         clip_view = ClipViewScreen(
             name='clip_view',
             app_state=self.state,
@@ -119,10 +124,23 @@ class PushControllerApp(App):
         )
         sm.add_widget(clip_view)
         
-        # TODO: Add other screens here
-        # devices_view = DevicesViewScreen(name='devices_view', ...)
-        # note_view = NoteViewScreen(name='note_view', ...)
-        # settings_view = SettingsViewScreen(name='settings_view', ...)
+        # Devices View
+        devices_view = DevicesViewScreen(
+            name='devices_view',
+            app_state=self.state
+        )
+        sm.add_widget(devices_view)
+        
+        # Note View
+        note_view = NoteViewScreen(name='note_view')
+        sm.add_widget(note_view)
+        
+        # Settings View
+        settings_view = SettingsViewScreen(name='settings_view')
+        sm.add_widget(settings_view)
+        
+        # Set initial screen
+        sm.current = 'clip_view'
         
         return sm
 

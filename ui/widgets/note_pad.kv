@@ -1,0 +1,44 @@
+#:kivy 2.3.0
+#:import dp kivy.metrics.dp
+
+<NotePad@Button>:
+    size_hint: None, None
+    size: dp(78), dp(78)
+    background_normal: ''
+    
+    # Properties
+    note_name: "C4"
+    midi_note: 60
+    is_playing: False
+    is_in_scale: True
+    pad_row: 0
+    pad_col: 0
+    
+    # Color logic based on state
+    bg_color: (0.22, 0.84, 0.43, 1) if self.is_playing else \
+              (0.27, 0.27, 0.27, 1) if self.is_in_scale else \
+              (0.13, 0.13, 0.13, 1)
+    
+    canvas.before:
+        Color:
+            rgba: self.bg_color
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(8)]
+        # Border
+        Color:
+            rgba: (0.33, 0.33, 0.33, 1) if not self.is_playing else (0.36, 0.89, 0.51, 1)
+        Line:
+            rounded_rectangle: (*self.pos, *self.size, dp(8))
+            width: dp(2)
+    
+    text: self.note_name
+    font_size: dp(16)
+    bold: True
+    color: 1, 1, 1, 1
+    halign: 'center'
+    valign: 'middle'
+    
+    on_press: root.note_on()
+    on_release: root.note_off()

@@ -1,0 +1,83 @@
+#:kivy 2.3.0
+#:import dp kivy.metrics.dp
+
+<DeviceKnob@BoxLayout>:
+    size_hint: None, None
+    size: dp(167), dp(100)
+    orientation: 'vertical'
+    spacing: dp(8)
+    padding: dp(33), dp(8)
+    
+    # Properties
+    display_value: "0"
+    param_name: "Param"
+    knob_value: 0.5
+    is_active: False
+    encoder_id: 0
+    
+    # Remove active highlight background - keep it transparent
+    canvas.before:
+        Color:
+            rgba: (0, 0, 0, 0)  # Always transparent
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(4)]
+    
+    # Knob visual
+    Widget:
+        size_hint: None, None
+        size: dp(36), dp(36)
+        pos_hint: {'center_x': 0.5}
+        
+        canvas:
+            # Knob background track
+            Color:
+                rgba: 0.15, 0.15, 0.15, 1
+            Ellipse:
+                pos: self.pos
+                size: self.size
+            
+            # Knob active arc - use consistent color
+            Color:
+                rgba: (0.4, 0.4, 0.4, 1)  # Always same gray color
+            Line:
+                circle: (self.center_x, self.center_y, dp(16), -90, -90 + (root.knob_value * 270))
+                width: dp(3)
+                cap: 'round'
+            
+            # Knob center
+            Color:
+                rgba: 0.25, 0.25, 0.25, 1
+            Ellipse:
+                pos: self.center_x - dp(8), self.center_y - dp(8)
+                size: dp(16), dp(16)
+            
+            # Knob indicator
+            PushMatrix
+            Rotate:
+                angle: (root.knob_value - 0.5) * 270
+                origin: self.center
+            Color:
+                rgba: 0.8, 0.8, 0.8, 1
+            Rectangle:
+                pos: self.center_x - dp(1), self.center_y + dp(4)
+                size: dp(2), dp(8)
+            PopMatrix
+    
+    # Value display - consistent color
+    Label:
+        text: root.display_value
+        font_size: dp(11)
+        color: (0.9, 0.9, 0.9, 1)  # Always bright
+        size_hint_y: None
+        height: dp(16)
+        bold: False  # Remove bold highlighting
+    
+    # Parameter name - consistent color
+    Label:
+        text: root.param_name
+        font_size: dp(9)
+        color: (0.7, 0.7, 0.7, 1)  # Always same color
+        size_hint_y: None
+        height: dp(14)

@@ -1,0 +1,26 @@
+<MixerKnob@Widget>:
+    size_hint: None, None
+    size: dp(16), dp(16)  # Even smaller for better fit
+    value: 0.5
+    min_value: 0.0
+    max_value: 1.0
+    
+    canvas:
+        # Knob background
+        Color:
+            rgba: 0.3, 0.3, 0.3, 1  # Slightly lighter for visibility
+        Ellipse:
+            pos: self.pos
+            size: self.size
+        
+        # Knob indicator
+        PushMatrix
+        Rotate:
+            angle: (self.value - 0.5) * 270  # -135° to +135°
+            origin: self.center
+        Color:
+            rgba: 0.9, 0.9, 0.9, 1  # Brighter indicator
+        Ellipse:
+            pos: self.center_x - dp(1), self.center_y + dp(5)
+            size: dp(2), dp(2)
+        PopMatrix

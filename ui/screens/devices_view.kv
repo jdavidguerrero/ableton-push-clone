@@ -1,0 +1,97 @@
+#:kivy 2.3.0
+#:import dp kivy.metrics.dp
+
+<DevicesViewScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: 0
+        
+        # Screen Header
+        ScreenHeader:
+            id: screen_header
+            title: "Device View"
+            info: root.current_device_name + " - Page " + str(root.current_page) + "/" + str(root.total_pages)
+        
+        # Device Selector (Kick/Serum navigation)
+        DeviceSelector:
+            id: device_selector
+            current_device: root.current_device_name
+            on_current_device: root.current_device_name = self.current_device
+        
+        # Main Knob Bank Area
+        BoxLayout:
+            id: knob_grid
+            orientation: 'vertical'
+            padding: dp(66), dp(10)
+            spacing: dp(20)
+            
+            # First row of knobs (Encoders 1-4)
+            BoxLayout:
+                id: knob_row_1
+                orientation: 'horizontal'
+                size_hint_y: None
+                height: dp(100)
+                spacing: 0
+                
+                DeviceKnob:
+                    id: knob_1
+                    encoder_id: 0
+                    # on_touch_down: root._set_active_encoder(0) if self.collide_point(*args[1].pos) else None
+                
+                DeviceKnob:
+                    id: knob_2
+                    encoder_id: 1
+                    # on_touch_down: root._set_active_encoder(1) if self.collide_point(*args[1].pos) else None
+                
+                DeviceKnob:
+                    id: knob_3
+                    encoder_id: 2
+                    # on_touch_down: root._set_active_encoder(2) if self.collide_point(*args[1].pos) else None
+                
+                DeviceKnob:
+                    id: knob_4
+                    encoder_id: 3
+                    # on_touch_down: root._set_active_encoder(3) if self.collide_point(*args[1].pos) else None
+            
+            # Second row of knobs (Encoders 5-8)
+            BoxLayout:
+                id: knob_row_2
+                orientation: 'horizontal'
+                size_hint_y: None
+                height: dp(100)
+                spacing: 0
+                
+                DeviceKnob:
+                    id: knob_5
+                    encoder_id: 4
+                    # on_touch_down: root._set_active_encoder(4) if self.collide_point(*args[1].pos) else None
+                
+                DeviceKnob:
+                    id: knob_6
+                    encoder_id: 5
+                    # on_touch_down: root._set_active_encoder(5) if self.collide_point(*args[1].pos) else None
+                
+                DeviceKnob:
+                    id: knob_7
+                    encoder_id: 6
+                    # on_touch_down: root._set_active_encoder(6) if self.collide_point(*args[1].pos) else None
+                
+                DeviceKnob:
+                    id: knob_8
+                    encoder_id: 7
+                    # on_touch_down: root._set_active_encoder(7) if self.collide_point(*args[1].pos) else None
+        
+        # Device Pagination
+        DevicePagination:
+            id: device_pagination
+            page_text: "Page " + str(root.current_page) + "/" + str(root.total_pages)
+            current_page: root.current_page
+            total_pages: root.total_pages
+            auto_switch: root.auto_switch
+            on_current_page: root.current_page = self.current_page
+            on_auto_switch: root.auto_switch = self.auto_switch
+        
+        # Navigation Bar
+        NavigationBar:
+            id: navigation_bar
+            selected_index: 1  # Devices tab active
