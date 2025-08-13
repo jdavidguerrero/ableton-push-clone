@@ -11,7 +11,7 @@ class GraphicsConfig:
     borderless: bool = True
     multisamples: int = 0
     maxfps: int = 60
-    fullscreen: bool = False  # Add fullscreen option
+    fullscreen: bool = True  # Add fullscreen option
 
 @dataclass(frozen=True)
 class AppConfig:
