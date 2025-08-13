@@ -5,6 +5,7 @@ import math
 
 class TrackVolume(BoxLayout):
     track_index = NumericProperty(0)
+    track_name  = StringProperty("")  # ADD THIS for real names
     title       = StringProperty("Vol")
 
     # Estado

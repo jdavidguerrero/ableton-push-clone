@@ -6,11 +6,13 @@
         orientation: 'vertical'
         spacing: 0
         
-        # Screen Header
+        # Screen Header - REDUCED HEIGHT
         ScreenHeader:
             id: screen_header
             title: "Mixer View"
             info: "All Tracks Mixer"
+            size_hint_y: None
+            height: dp(40)  # Reduced from default
         
         # Main Mixer Area - FULL SCREEN
         ScrollView:
@@ -23,8 +25,8 @@
                 orientation: 'horizontal'
                 size_hint_x: None
                 width: self.minimum_width
-                spacing: dp(4)
-                padding: dp(10), dp(20)
+                spacing: dp(3)  # Reduced spacing
+                padding: dp(8), dp(10)  # Reduced padding
                 canvas.before:
                     Color:
                         rgba: 0.05, 0.05, 0.05, 1
@@ -32,13 +34,13 @@
                         pos: self.pos
                         size: self.size
         
-        # Master Section - FIXED AT BOTTOM
+        # Master Section - MUCH SMALLER
         BoxLayout:
             size_hint_y: None
-            height: dp(80)
+            height: dp(50)  # REDUCED from 80 to 50
             orientation: 'horizontal'
-            padding: dp(20), dp(10)
-            spacing: dp(20)
+            padding: dp(15), dp(5)  # Reduced padding
+            spacing: dp(15)  # Reduced spacing
             canvas.before:
                 Color:
                     rgba: 0.12, 0.12, 0.12, 1
@@ -51,21 +53,21 @@
                     points: [self.x, self.top, self.right, self.top]
                     width: 1
             
-            # Master Volume Label
+            # Master Volume Label - SMALLER
             Label:
                 text: "MASTER"
                 size_hint_x: None
-                width: dp(80)
-                font_size: dp(14)
+                width: dp(60)  # Reduced from 80
+                font_size: dp(12)  # Reduced font
                 bold: True
                 color: 0.9, 0.9, 0.9, 1
                 halign: 'center'
                 valign: 'middle'
             
-            # Master Volume Slider
+            # Master Volume Slider - MUCH SMALLER
             BoxLayout:
-                orientation: 'vertical'
-                spacing: dp(5)
+                orientation: 'horizontal'  # Changed to horizontal
+                spacing: dp(8)
                 
                 Slider:
                     id: master_volume
@@ -73,43 +75,42 @@
                     max: 1
                     value: 0.8
                     size_hint_y: None
-                    height: dp(30)
+                    height: dp(20)  # Much smaller
                     
                 Label:
                     text: f"{int(master_volume.value * 100)}%"
-                    size_hint_y: None
-                    height: dp(20)
-                    font_size: dp(12)
+                    size_hint_x: None
+                    width: dp(40)  # Fixed width
+                    font_size: dp(10)  # Smaller font
                     color: 0.8, 0.8, 0.8, 1
                     halign: 'center'
+                    valign: 'middle'
             
-            # BPM Display
+            # BPM Display - SMALLER
             BoxLayout:
                 size_hint_x: None
-                width: dp(120)
-                orientation: 'vertical'
+                width: dp(80)  # Reduced from 120
+                orientation: 'horizontal'
                 spacing: dp(5)
                 
                 Label:
-                    text: "BPM"
-                    font_size: dp(12)
+                    text: "BPM:"
+                    font_size: dp(10)  # Smaller
                     color: 0.7, 0.7, 0.7, 1
                     halign: 'center'
-                    size_hint_y: None
-                    height: dp(15)
+                    valign: 'middle'
+                    size_hint_x: None
+                    width: dp(35)
                 
                 Label:
                     text: "120.0"
-                    font_size: dp(18)
+                    font_size: dp(14)  # Smaller
                     bold: True
                     color: 1, 1, 1, 1
                     halign: 'center'
-                    size_hint_y: None
-                    height: dp(30)
-                
-                Widget:
-                    size_hint_y: None
-                    height: dp(15)
+                    valign: 'middle'
+                    size_hint_x: None
+                    width: dp(40)
         
         # Navigation Bar
         NavigationBar:

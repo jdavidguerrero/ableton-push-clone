@@ -5,8 +5,8 @@ from pathlib import Path
 @dataclass(frozen=True)
 class GraphicsConfig:
     """Graphics configuration settings"""
-    width: int = 400    
-    height: int = 240
+    width: int = 800    
+    height: int = 480
     resizable: bool = False
     borderless: bool = True
     multisamples: int = 0

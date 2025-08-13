@@ -3,6 +3,7 @@ from kivy.properties import NumericProperty, StringProperty, ListProperty
 from logic.bus import bus
 from typing import Optional
 import logging
+from kivy.metrics import dp
 
 class MixerViewScreen(Screen):
     """Dedicated mixer view for all tracks with enhanced controls"""
@@ -66,8 +67,9 @@ class MixerViewScreen(Screen):
                 # Enhanced mixer widget with better sizing for full screen
                 mixer = TrackVolume(
                     track_index=track_idx,
+                    track_name=track["name"],  # PASS REAL TRACK NAME
                     size_hint_x=None,
-                    width=120,  # Wider for better touch targets
+                    width=dp(85),  # Reduced width to fit more tracks on screen
                 )
                 
                 # Update mixer with track state if available
@@ -82,7 +84,7 @@ class MixerViewScreen(Screen):
                 mixers_container.add_widget(mixer)
             
             # Set container width for scrolling
-            mixers_container.width = len(self.demo_tracks) * 124  # 120 + 4 spacing
+            mixers_container.width = len(self.demo_tracks) * 88  # 85 + 3 spacing
     
     # Event Handlers
     def _on_track_volume_changed(self, **kwargs):
