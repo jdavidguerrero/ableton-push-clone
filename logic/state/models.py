@@ -1,23 +1,38 @@
 from dataclasses import dataclass, field
-from typing import Dict, List, Tuple
-Color = Tuple[float,float,float,float]
+from typing import Dict, Optional
+from enum import Enum
 
-@dataclass
+class ClipStatus(Enum):
+    EMPTY = "empty"
+    PLAYING = "playing"
+    QUEUED = "queued"
+    RECORDING = "recording"
+
+@dataclass(frozen=True)
 class ClipSlotState:
-    status: str = "empty"  # empty|playing|queued|recording|selected
-    color: Color = (0.25,0.25,0.25,1.0)
+    status: ClipStatus = ClipStatus.EMPTY
+    name: str = ""
+    color: tuple[float, float, float, float] = (0.25, 0.25, 0.25, 1.0)
 
-@dataclass
+    @property
+    def is_playing(self) -> bool:
+        return self.status == ClipStatus.PLAYING
+
+@dataclass(frozen=True)
 class TrackState:
-    name: str = "Track"
-    color: Color = (0.0,0.4,1.0,1.0)
-    volume: float = 0.8
-    pan: float = 0.0
-    sends: List[float] = field(default_factory=lambda:[0.0,0.0,0.0])
+    id: int
+    name: str
+    clips: Dict[int, ClipSlotState] = field(default_factory=dict)
+    volume: float = field(default=0.8)
+    pan: float = field(default=0.0)
+    sends: list[float] = field(default_factory=lambda: [0.0, 0.0, 0.0])
     mute: bool = False
     solo: bool = False
     arm: bool = False
-    clips: Dict[int, ClipSlotState] = field(default_factory=dict)
+
+    def __post_init__(self):
+        if not 0 <= self.volume <= 1:
+            raise ValueError("Volume must be between 0 and 1")
 
 @dataclass
 class TransportState:
