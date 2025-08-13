@@ -68,28 +68,42 @@ class LiveIntegration:
         if not self.osc_client:
             return
         
-        # Track updates from Live
-        self.osc_client.register_handler("/push/track/*/volume", self._handle_track_volume)
-        self.osc_client.register_handler("/push/track/*/pan", self._handle_track_pan)
-        self.osc_client.register_handler("/push/track/*/mute", self._handle_track_mute)
-        self.osc_client.register_handler("/push/track/*/solo", self._handle_track_solo)
-        self.osc_client.register_handler("/push/track/*/arm", self._handle_track_arm)
-        self.osc_client.register_handler("/push/track/*/name", self._handle_track_name)
+        # Track updates from Live (AbletonOSC format)
+        self.osc_client.register_handler("/live/track/get/volume", self._handle_track_volume_response)
+        self.osc_client.register_handler("/live/track/get/pan", self._handle_track_pan_response)
+        self.osc_client.register_handler("/live/track/get/mute", self._handle_track_mute_response)
+        self.osc_client.register_handler("/live/track/get/solo", self._handle_track_solo_response)
+        self.osc_client.register_handler("/live/track/get/arm", self._handle_track_arm_response)
+        self.osc_client.register_handler("/live/track/get/name", self._handle_track_name_response)
         
         # Clip updates from Live
-        self.osc_client.register_handler("/push/clip/*/*/status", self._handle_clip_status)
-        self.osc_client.register_handler("/push/clip/*/*/name", self._handle_clip_name)
+        self.osc_client.register_handler("/live/clip/get/playing_status", self._handle_clip_status_response)
+        self.osc_client.register_handler("/live/clip/get/name", self._handle_clip_name_response)
         
-        # Project info
-        self.osc_client.register_handler("/push/tempo", self._handle_tempo)
-        self.osc_client.register_handler("/push/sync/complete", self._handle_sync_complete)
-    
+        # Song-level info
+        self.osc_client.register_handler("/live/song/get/tempo", self._handle_tempo_response)
+        self.osc_client.register_handler("/live/song/get/track_names", self._handle_track_names_response)
+        
+        # Live responses
+        self.osc_client.register_handler("/live/test", self._handle_live_test)
+
     def _request_initial_sync(self):
         """Request all data from Live on connection"""
         if self.osc_client:
             self.is_syncing = True
-            self.osc_client.request_sync()
-            self.logger.info("Requesting initial sync from Live")
+            
+            # Request song info
+            self.osc_client.get_track_names()
+            self.osc_client.get_scene_names()
+            self.osc_client.send_message("/live/song/get/tempo")
+            
+            # Request track data for first 8 tracks
+            for track_id in range(8):
+                self.osc_client.start_listen_track_volume(track_id)
+                self.osc_client.send_message(f"/live/track/get/volume", track_id)
+                self.osc_client.send_message(f"/live/track/get/name", track_id)
+                
+            self.logger.info("Requesting initial sync from AbletonOSC")
     
     # === OUTGOING (Push → Live) ===
     
@@ -277,6 +291,18 @@ class LiveIntegration:
         self.is_syncing = False
         self.logger.info("Live sync completed")
         bus.emit("live:sync_complete")
+    
+    def _handle_track_names_response(self, address: str, *args):
+        """Handle track names from Live"""
+        if args:
+            track_names = args  # AbletonOSC sends track names as multiple args
+            self.logger.info(f"Live track names: {track_names}")
+            bus.emit("live:track_names", names=track_names)
+
+    def _handle_live_test(self, address: str, *args):
+        """Handle test response from Live"""
+        self.logger.info(f"Live test response: {args}")
+        bus.emit("live:connection_confirmed")
     
     def get_status(self) -> dict:
         """Get integration status"""
