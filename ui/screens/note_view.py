@@ -104,7 +104,7 @@ class NoteViewScreen(Screen):
             
             self._update_pad_grid()
             
-            self.logger.info(f"Mock Live: Track {track_id} focused -> {track_info['device']} ({self.current_mode} mode)")
+            #self.logger.info(f"Mock Live: Track {track_id} focused -> {track_info['device']} ({self.current_mode} mode)")
     
     def _on_mock_track_changed(self, **kwargs):
         """Mock handler for Live track changes"""
