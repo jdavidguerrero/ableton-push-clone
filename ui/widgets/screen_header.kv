@@ -16,11 +16,11 @@
             width: 1
             rectangle: (*self.pos, *self.size)
     
-    # Center everything with spacers
-    Widget:  # Left spacer
+    # Left spacer
+    Widget:
         size_hint_x: 1
     
-    # Main title - centered and larger
+    # Main title - centered
     Label:
         id: view_label
         text: root.title
@@ -32,7 +32,7 @@
         halign: 'center'
         valign: 'middle'
     
-    # Info text - centered and readable
+    # Info text - centered
     Label:
         id: info_label
         text: root.info
@@ -43,5 +43,25 @@
         halign: 'center'
         valign: 'middle'
     
-    Widget:  # Right spacer
+    # Right spacer
+    Widget:
         size_hint_x: 1
+    
+    # Close button - positioned at the right
+    Button:
+        text: "✕"
+        size_hint: None, None
+        size: dp(40), dp(34)
+        background_normal: ''
+        background_color: 0.8, 0.2, 0.2, 1  # Red background
+        color: 1, 1, 1, 1
+        font_size: dp(18)
+        bold: True
+        on_release: root.close_app()
+        canvas.before:
+            Color:
+                rgba: self.background_color
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(4)]

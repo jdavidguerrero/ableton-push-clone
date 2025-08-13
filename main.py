@@ -13,6 +13,7 @@ from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager
 from kivy.lang import Builder
 from kivy.resources import resource_add_path
+from kivy.core.window import Window
 
 # Centralized configuration
 from config.config import AppConfig
@@ -61,7 +62,10 @@ class PushControllerApp(App):
         # 5. Initialize business logic
         self._init_business_logic()
         
-        # 6. Create UI
+        # 6. Setup window events
+        self._setup_window()
+        
+        # 7. Create UI
         return self._create_ui()
     
     def _apply_config(self):
@@ -73,6 +77,7 @@ class PushControllerApp(App):
         Config.set('graphics', 'borderless', str(int(graphics.borderless)))
         Config.set('graphics', 'multisamples', str(graphics.multisamples))
         Config.set('graphics', 'maxfps', str(graphics.maxfps))
+        Config.set('graphics', 'fullscreen', str(int(graphics.fullscreen)))  # Add fullscreen
     
     def _setup_logging(self):
         """Setup logging system"""
@@ -111,6 +116,31 @@ class PushControllerApp(App):
         self.state.init_project(tracks=8, scenes=12)
         
         self.clip_manager = ClipManager(self.state)
+    
+    def _setup_window(self):
+        """Setup window events and properties"""
+        # Bind escape key to exit (useful for development)
+        Window.bind(on_key_down=self._on_key_down)
+        
+        # Set fullscreen if configured
+        if self.config_app.graphics.fullscreen:
+            Window.fullscreen = 'auto'
+    
+    def _on_key_down(self, window, key, scancode, codepoint, modifier):
+        """Handle key press events"""
+        # ESC key to exit fullscreen or close app
+        if key == 27:  # ESC key
+            if Window.fullscreen:
+                Window.fullscreen = False
+            else:
+                self.stop()
+            return True
+        return False
+    
+    def close_app(self):
+        """Close the application"""
+        self.logger.info("Application closing...")
+        self.stop()
     
     def _create_ui(self):
         """Create user interface"""
