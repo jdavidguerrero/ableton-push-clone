@@ -1,38 +1,46 @@
 <NavigationBar>:
     size_hint_y: None
-    height: dp(50)
+    height: dp(60)
     orientation: 'horizontal'
-    spacing: 10
-    padding: [18, 10]
+    spacing: 12
+    padding: [20, 12]
     canvas.before:
         Color:
-            rgba: 0.0705, 0.0705, 0.0705, 1
+            rgba: 0.08, 0.08, 0.08, 1  # Dark background, same as StatusBar
         Rectangle:
             pos: self.pos
             size: self.size
-        Color:
-            rgba: 0.1686, 0.1686, 0.1686, 1
-        Line:
-            width: 1
-            rectangle: (*self.pos, *self.size)
+        # Remove the border - no Line widget
 
     NavButton:
         text: "Clip View"
-        icon_source: "assets/icons/clip.png"
+        icon_source: "clip.png"
         active: True
+        size_hint_y: None
+        height: dp(40)
+        pos_hint: {'center_y': 0.5}
         on_release: root.set_active(0)
 
     NavButton:
         text: "Devices"
-        icon_source: "assets/icons/devices.png"
+        icon_source: "devices.png"
+        size_hint_y: None
+        height: dp(40)
+        pos_hint: {'center_y': 0.5}
         on_release: root.set_active(1)
 
     NavButton:
         text: "Note"
-        icon_source: "assets/icons/note.png"
+        icon_source: "note.png"
+        size_hint_y: None
+        height: dp(40)
+        pos_hint: {'center_y': 0.5}
         on_release: root.set_active(2)
 
     NavButton:
         text: "Settings"
-        icon_source: "assets/icons/settings.png"
+        icon_source: "settings.png"
+        size_hint_y: None
+        height: dp(40)
+        pos_hint: {'center_y': 0.5}
         on_release: root.set_active(3)

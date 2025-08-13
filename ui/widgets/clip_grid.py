@@ -1,6 +1,6 @@
 from kivy.uix.boxlayout import BoxLayout
 from kivy.metrics import dp
-from widgets.track_channel import TrackChannel
+from .track_channel import TrackChannel
 
 class ClipGrid(BoxLayout):
     """

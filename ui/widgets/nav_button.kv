@@ -1,9 +1,6 @@
-#:import NavButton widgets.NavButton
-#:import IconButton widgets.IconButton
-
 <NavButton>:
     size_hint: None, None
-    size: 100, 40
+    size: 120, 40  # Slightly wider for better visibility
     orientation: 'horizontal'
     spacing: 6
     padding: [8, 8]
@@ -15,7 +12,7 @@
             size: self.size
             radius: [6, 6, 6, 6]
 
-    # Icono con tinte según activo
+    # Icon with tint based on active state
     Image:
         source: root.icon_source
         size_hint: None, None

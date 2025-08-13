@@ -1,51 +1,59 @@
-#:import TrackVolume widgets.TrackVolume
-#:import ClipGrid widgets.ClipGrid
-#:import ScreenHeader widgets.ScreenHeader
-#:import StatusBar widgets.StatusBar
-#:import NavigationBar widgets.NavigationBar
+#:kivy 2.3.0
+#:import dp kivy.metrics.dp
 
 <ClipViewScreen>:
-    # layout general de tu pantalla
     BoxLayout:
         orientation: 'vertical'
-        # GRID (704x270 aprox dentro de un Scroll si hace falta)
-        ScrollView:
-            size_hint_y: None
-            height: dp(270)
-            do_scroll_y: False
-            do_scroll_x: True
-            ClipGrid:
-                id: clip_grid
-
-        # Mixer (fila con TrackVolume del track enfocado o de varios)
-        ScrollView:
-            size_hint_y: None
-            height: dp(100)
-            do_scroll_y: False
-            do_scroll_x: True
-            BoxLayout:
-                id: mixer_row
-                size_hint: None, None
-                height: dp(95)
-                width: self.minimum_width
-                spacing: dp(6)
-        # Panel de mixer dinámico (aparece al tocar un TrackHeader)
+        spacing: 0
+        
+        # Screen Header 
+        ScreenHeader:
+            id: screen_header
+            title: "Clip View"
+            info: "Scene 1 / Track 1"
+        
+        # Main Grid Area (clips) - FIXED: Show 8 tracks, scroll for more
         BoxLayout:
-            id: mixer_panel
-            size_hint_y: None
-            height: dp(100)
-            opacity: 1 if root.mixer_visible else 0
-            disabled: not root.mixer_visible
-            padding: dp(8), 0
-            TrackVolume:
-                id: track_volume
-                # El set_params se llama desde Python
-                # Aquí podrías replicar varios si quieres ver varios a la vez
-
+            orientation: 'horizontal'
+            
+            # Left spacer - centers the 8-track viewport
+            Widget:
+            
+            # Fixed viewport for exactly 8 tracks
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_x: None
+                width: dp(704)  # Exactly 8 tracks * 88px each
+                
+                # Top spacer for vertical centering
+                Widget:
+                    size_hint_y: 0.2
+                
+                # ScrollView with fixed size for 8 tracks
+                ScrollView:
+                    size_hint_y: None
+                    height: dp(270)  # ClipGrid height
+                    do_scroll_y: False
+                    do_scroll_x: True
+                    
+                    ClipGrid:
+                        id: clip_grid
+                        size_hint_x: None
+                        # ClipGrid width will expand based on number of tracks
+                
+                # Bottom spacer for vertical centering
+                Widget:
+                    size_hint_y: 0.2
+            
+            # Right spacer - centers the 8-track viewport
+            Widget:
+        
+        # Status Bar 
         StatusBar:
             scene_text: "Scene 1"
             track_text: root.current_track_text
             bpm_text: "BPM: 120"
-
+        
+        # Navigation Bar - ensure it has enough space
         NavigationBar:
             selected_index: 0

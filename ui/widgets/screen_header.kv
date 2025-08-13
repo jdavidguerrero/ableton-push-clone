@@ -1,39 +1,47 @@
 <ScreenHeader>:
     size_hint_y: None
-    height: 40
-    padding: [16, 10]
-    spacing: 10
+    height: dp(50)  # Taller for bigger text
+    padding: [16, 8]
+    spacing: 20
     orientation: 'horizontal'
     canvas.before:
         Color:
-            rgba: 0.2, 0.2, 0.2, 1  # Much brighter background for visibility
+            rgba: 0.15, 0.15, 0.15, 1  # Darker for better contrast
         Rectangle:
             pos: self.pos
             size: self.size
-        # Add a more visible border
         Color:
-            rgba: 0.5, 0.5, 0.5, 1
+            rgba: 0.4, 0.4, 0.4, 1
         Line:
-            width: 3
+            width: 1
             rectangle: (*self.pos, *self.size)
+    
+    # Center everything with spacers
+    Widget:  # Left spacer
+        size_hint_x: 1
+    
+    # Main title - centered and larger
     Label:
         id: view_label
         text: root.title
         size_hint_x: None
-        width: 84
+        width: self.texture_size[0]
         color: 1, 1, 1, 1
-        font_size: 18
+        font_size: dp(24)  # Much larger
         bold: True
         halign: 'center'
         valign: 'middle'
-        text_size: self.size
+    
+    # Info text - centered and readable
     Label:
         id: info_label
         text: root.info
         size_hint_x: None
-        width: 150
-        color: 1, 1, 1, 1
-        font_size: 14
+        width: self.texture_size[0]
+        color: 0.8, 0.8, 0.8, 1  # Slightly dimmer
+        font_size: dp(16)  # Larger but secondary
         halign: 'center'
         valign: 'middle'
-        text_size: self.size
+    
+    Widget:  # Right spacer
+        size_hint_x: 1

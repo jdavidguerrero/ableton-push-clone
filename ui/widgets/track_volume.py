@@ -1,5 +1,5 @@
 from kivy.uix.boxlayout import BoxLayout
-from kivy.properties import NumericProperty, StringProperty
+from kivy.properties import NumericProperty, StringProperty, BooleanProperty
 from kivy.clock import Clock
 
 class TrackVolume(BoxLayout):
@@ -13,9 +13,9 @@ class TrackVolume(BoxLayout):
     send_b  = NumericProperty(0.0)
     send_c  = NumericProperty(0.0)
 
-    is_mute = NumericProperty(0)     # 0/1
-    is_solo = NumericProperty(0)
-    is_arm  = NumericProperty(0)
+    is_mute = BooleanProperty(False)     # 0/1
+    is_solo = BooleanProperty(False)
+    is_arm  = BooleanProperty(False)
 
     def _notify(self, what, value):
         app = None

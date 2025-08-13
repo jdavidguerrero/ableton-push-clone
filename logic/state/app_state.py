@@ -1,5 +1,14 @@
-from .models import AppStateModel, TrackState, ClipSlotState
+from .models import AppStateModel, TrackState, ClipSlotState, ClipStatus
 from ..bus import bus
+from dataclasses import dataclass, field
+from typing import Dict, Optional
+from enum import Enum
+
+class ClipStatus(Enum):
+    EMPTY = "empty"
+    PLAYING = "playing"
+    QUEUED = "queued"
+    RECORDING = "recording"
 
 class AppState:
     def __init__(self):
@@ -17,17 +26,57 @@ class AppState:
         bus.emit(f"state:{key}", **data)
 
     def init_project(self, tracks=8, scenes=8):
+        """Initialize project with tracks and scenes"""
         self.m.scenes_count = scenes
         self.m.tracks = {}
+        
         for t in range(tracks):
-            tr = TrackState(name=f"Track {t+1}")
-            tr.clips = {s: ClipSlotState() for s in range(scenes)}
+            # Create clips for this track
+            clips_dict = {s: ClipSlotState() for s in range(scenes)}
+            
+            # Create track with all data
+            tr = TrackState(
+                id=t,
+                name=f"Track {t+1}",
+                clips=clips_dict
+            )
             self.m.tracks[t] = tr
+            
         self._emit("tracks_changed", tracks=self.m.tracks)
 
-    def set_clip_status(self, t:int, s:int, status:str):
-        self.m.tracks[t].clips[s].status = status
-        self._emit("clip_changed", track=t, scene=s, status=status)
+    def set_clip_status(self, track_id: int, scene_id: int, status: str):
+        """Update clip status creating new immutable objects"""
+        if track_id in self.m.tracks:
+            old_track = self.m.tracks[track_id]
+            old_clip = old_track.clips.get(scene_id, ClipSlotState())
+            
+            # Create new clip with updated status
+            new_clip = ClipSlotState(
+                status=ClipStatus(status),
+                name=old_clip.name,
+                color=old_clip.color
+            )
+            
+            # Create new clips dict
+            new_clips = old_track.clips.copy()
+            new_clips[scene_id] = new_clip
+            
+            # Create new track
+            new_track = TrackState(
+                id=old_track.id,
+                name=old_track.name,
+                clips=new_clips,
+                volume=old_track.volume,
+                pan=old_track.pan,
+                sends=old_track.sends,
+                mute=old_track.mute,
+                solo=old_track.solo,
+                arm=old_track.arm
+            )
+            
+            # Update state
+            self.m.tracks[track_id] = new_track
+            self._emit("clip_changed", track=track_id, scene=scene_id, status=status)
 
     # mixer
     def set_volume(self, t:int, v:float):
