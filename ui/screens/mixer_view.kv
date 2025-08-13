@@ -1,0 +1,116 @@
+#:kivy 2.3.0
+#:import dp kivy.metrics.dp
+
+<MixerViewScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: 0
+        
+        # Screen Header
+        ScreenHeader:
+            id: screen_header
+            title: "Mixer View"
+            info: "All Tracks Mixer"
+        
+        # Main Mixer Area - FULL SCREEN
+        ScrollView:
+            id: mixer_scroll
+            do_scroll_y: False   # Only horizontal scroll
+            do_scroll_x: True
+            
+            BoxLayout:
+                id: mixers_container
+                orientation: 'horizontal'
+                size_hint_x: None
+                width: self.minimum_width
+                spacing: dp(4)
+                padding: dp(10), dp(20)
+                canvas.before:
+                    Color:
+                        rgba: 0.05, 0.05, 0.05, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+        
+        # Master Section - FIXED AT BOTTOM
+        BoxLayout:
+            size_hint_y: None
+            height: dp(80)
+            orientation: 'horizontal'
+            padding: dp(20), dp(10)
+            spacing: dp(20)
+            canvas.before:
+                Color:
+                    rgba: 0.12, 0.12, 0.12, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+                Color:
+                    rgba: 0.25, 0.25, 0.25, 1
+                Line:
+                    points: [self.x, self.top, self.right, self.top]
+                    width: 1
+            
+            # Master Volume Label
+            Label:
+                text: "MASTER"
+                size_hint_x: None
+                width: dp(80)
+                font_size: dp(14)
+                bold: True
+                color: 0.9, 0.9, 0.9, 1
+                halign: 'center'
+                valign: 'middle'
+            
+            # Master Volume Slider
+            BoxLayout:
+                orientation: 'vertical'
+                spacing: dp(5)
+                
+                Slider:
+                    id: master_volume
+                    min: 0
+                    max: 1
+                    value: 0.8
+                    size_hint_y: None
+                    height: dp(30)
+                    
+                Label:
+                    text: f"{int(master_volume.value * 100)}%"
+                    size_hint_y: None
+                    height: dp(20)
+                    font_size: dp(12)
+                    color: 0.8, 0.8, 0.8, 1
+                    halign: 'center'
+            
+            # BPM Display
+            BoxLayout:
+                size_hint_x: None
+                width: dp(120)
+                orientation: 'vertical'
+                spacing: dp(5)
+                
+                Label:
+                    text: "BPM"
+                    font_size: dp(12)
+                    color: 0.7, 0.7, 0.7, 1
+                    halign: 'center'
+                    size_hint_y: None
+                    height: dp(15)
+                
+                Label:
+                    text: "120.0"
+                    font_size: dp(18)
+                    bold: True
+                    color: 1, 1, 1, 1
+                    halign: 'center'
+                    size_hint_y: None
+                    height: dp(30)
+                
+                Widget:
+                    size_hint_y: None
+                    height: dp(15)
+        
+        # Navigation Bar
+        NavigationBar:
+            selected_index: 1  # Mixer will be index 1 (after Clip View)

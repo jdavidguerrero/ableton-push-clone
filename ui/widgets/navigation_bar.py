@@ -16,9 +16,10 @@ class NavigationBar(BoxLayout):
         screen_name = kwargs.get('screen', '')
         screen_map = {
             'clip_view': 0,
-            'devices_view': 1, 
-            'note_view': 2,
-            'settings_view': 3
+            'mixer_view': 1,      # NEW MIXER VIEW
+            'devices_view': 2,    # Updated indices
+            'note_view': 3,
+            'settings_view': 4
         }
         
         if screen_name in screen_map:
@@ -34,7 +35,7 @@ class NavigationBar(BoxLayout):
     
     def _update_button_states(self):
         """Update visual states of all buttons"""
-        for i, child in enumerate(self.children[::-1]):  # children está invertido
+        for i, child in enumerate(self.children[::-1]):  # children reversed
             if hasattr(child, 'active'):
                 child.active = (i == self.selected_index)
     
@@ -48,12 +49,13 @@ class NavigationBar(BoxLayout):
         if not hasattr(screen_manager, 'current'):
             return
         
-        # Mapeo de índices a nombres de pantalla
+        # Updated screen map for 5 screens
         screen_map = {
             0: 'clip_view',
-            1: 'devices_view', 
-            2: 'note_view',
-            3: 'settings_view'
+            1: 'mixer_view',      # NEW MIXER VIEW
+            2: 'devices_view',    # Updated indices
+            3: 'note_view',
+            4: 'settings_view'
         }
         
         screen_name = screen_map.get(screen_index)

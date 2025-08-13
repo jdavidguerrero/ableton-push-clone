@@ -2,169 +2,412 @@
 #:import dp kivy.metrics.dp
 
 <TrackVolume>:
-    size_hint: None, None
-    width: dp(88)  # Increased width to match track width exactly
-    height: dp(90)
     orientation: 'vertical'
-    padding: dp(3), dp(3)  # Reduced padding to fit better
-    spacing: dp(2)  # Tight spacing
+    size_hint_y: None
+    height: dp(320)  # Más alto para mejor UX
+    spacing: dp(6)   # Reduced spacing
+    padding: dp(6), dp(8)  # Reduced padding
     canvas.before:
         Color:
-            rgba: (0.12, 0.12, 0.12, 1)
+            rgba: 0.15, 0.15, 0.15, 1
         RoundedRectangle:
             pos: self.pos
             size: self.size
-            radius: [dp(4),]
-
-    # Volume fader - HORIZONTAL with proper sizing
-    BoxLayout:
-        size_hint: 1, None
+            radius: [dp(8)]
+        Color:
+            rgba: 0.35, 0.35, 0.35, 1
+        Line:
+            rounded_rectangle: (*self.pos, *self.size, dp(8))
+            width: 1
+    
+    # Track Name Header - BETTER SIZED
+    Label:
+        text: f"Track {root.track_index + 1}"
+        size_hint_y: None
         height: dp(18)  # Reduced height
-        spacing: dp(3)  # Tight spacing
+        font_size: dp(11)  # Smaller font
+        bold: True
+        color: 1, 1, 1, 1
+        halign: 'center'
+        valign: 'middle'
+    
+    # SMA Buttons Row - FIXED LAYOUT AND TOGGLE
+    BoxLayout:
+        size_hint_y: None
+        height: dp(28)  # Reduced height to fit
         orientation: 'horizontal'
+        spacing: dp(1)  # Minimal spacing
+        
+        Button:
+            text: "S"
+            background_normal: ''
+            background_color: (0.8, 0.6, 0.2, 1) if root.is_solo else (0.3, 0.3, 0.3, 1)
+            color: (1, 1, 1, 1) if root.is_solo else (0.7, 0.7, 0.7, 1)
+            font_size: dp(10)  # Smaller font
+            bold: True
+            on_release: root.toggle_solo()  # Use toggle method
+            canvas.before:
+                Color:
+                    rgba: self.background_color
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(3)]
+        
+        Button:
+            text: "M"
+            background_normal: ''
+            background_color: (0.8, 0.2, 0.2, 1) if root.is_mute else (0.3, 0.3, 0.3, 1)
+            color: (1, 1, 1, 1) if root.is_mute else (0.7, 0.7, 0.7, 1)
+            font_size: dp(10)  # Smaller font
+            bold: True
+            on_release: root.toggle_mute()  # Use toggle method
+            canvas.before:
+                Color:
+                    rgba: self.background_color
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(3)]
+        
+        Button:
+            text: "A"
+            background_normal: ''
+            background_color: (0.2, 0.8, 0.2, 1) if root.is_arm else (0.3, 0.3, 0.3, 1)
+            color: (1, 1, 1, 1) if root.is_arm else (0.7, 0.7, 0.7, 1)
+            font_size: dp(10)  # Smaller font
+            bold: True
+            on_release: root.toggle_arm()  # Use toggle method
+            canvas.before:
+                Color:
+                    rgba: self.background_color
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(3)]
+    
+    # Main Volume Fader - VERTICAL SLIDER
+    BoxLayout:
+        orientation: 'vertical'
+        size_hint_y: None
+        height: dp(115)  # Reduced height
+        spacing: dp(3)   # Reduced spacing
         
         Label:
             text: "VOL"
+            size_hint_y: None
+            height: dp(12)  # Smaller
+            font_size: dp(9)
             color: 0.8, 0.8, 0.8, 1
-            font_size: dp(7)  # Smaller font
-            bold: True
-            size_hint_x: None
-            width: dp(20)  # Reduced width
             halign: 'center'
-            valign: 'middle'
         
+        # VERTICAL SLIDER for better mixer feel
         Slider:
-            min: 0.0
-            max: 1.0
+            id: volume_slider
+            orientation: 'vertical'
+            min: 0
+            max: 1
             value: root.volume
-            orientation: 'horizontal'
-            on_value: root.volume = self.value
-            cursor_size: dp(8), dp(12)  # Smaller cursor
-
-    # Pan knob - centered with proper spacing
-    BoxLayout:
-        size_hint: 1, None
-        height: dp(22)  # Compact height
-        
-        Widget:
-            size_hint_x: 0.3
-        
-        BoxLayout:
-            orientation: 'vertical'
+            on_value: root._notify("volume", self.value)
             size_hint_x: None
-            width: dp(20)
-            spacing: dp(1)
-            
-            MixerKnob:
-                value: (root.pan + 1) / 2
-                on_touch_down: 
-                    if self.collide_point(*args[1].pos): \
-                    root.pan = (self.value * 2) - 1
-            
-            Label:
-                text: "PAN"
-                font_size: dp(6)
-                color: 0.7, 0.7, 0.7, 1
-                size_hint_y: None
-                height: dp(8)
-                halign: 'center'
+            width: dp(25)  # Thinner
+            pos_hint: {'center_x': 0.5}
         
-        Widget:
-            size_hint_x: 0.3
-
-    # Sends knobs - with labels below
+        Label:
+            text: f"{int(root.volume * 100)}"
+            size_hint_y: None
+            height: dp(12)  # Smaller
+            font_size: dp(8)
+            color: 0.7, 0.7, 0.7, 1
+            halign: 'center'
+    
+    # Pan Control - ROTARY KNOB
     BoxLayout:
-        size_hint: 1, None
-        height: dp(22)  # Compact height
+        orientation: 'vertical'
+        size_hint_y: None
+        height: dp(55)  # Reduced height
         spacing: dp(2)
-        padding: dp(2), 0
         
-        # Send A
-        BoxLayout:
-            orientation: 'vertical'
-            spacing: dp(1)
-            
-            MixerKnob:
-                value: root.send_a
-                on_touch_down:
-                    if self.collide_point(*args[1].pos): \
-                    root.send_a = self.value
-            
-            Label:
-                text: "A"
-                font_size: dp(6)
-                color: 0.7, 0.7, 0.7, 1
-                size_hint_y: None
-                height: dp(8)
-                halign: 'center'
+        Label:
+            text: "PAN"
+            size_hint_y: None
+            height: dp(10)  # Smaller
+            font_size: dp(8)
+            color: 0.8, 0.8, 0.8, 1
+            halign: 'center'
         
-        # Send B
-        BoxLayout:
-            orientation: 'vertical'
-            spacing: dp(1)
+        # PAN KNOB WIDGET
+        Widget:
+            id: pan_knob
+            size_hint: None, None
+            size: dp(28), dp(28)  # Smaller knob
+            pos_hint: {'center_x': 0.5}
+            on_touch_down: root._on_pan_knob_touch_down(args[1]) if self.collide_point(*args[1].pos) else None
+            on_touch_move: root._on_pan_knob_touch_move(args[1]) if self.collide_point(*args[1].pos) else None
             
-            MixerKnob:
-                value: root.send_b
-                on_touch_down:
-                    if self.collide_point(*args[1].pos): \
-                    root.send_b = self.value
-            
-            Label:
-                text: "B"
-                font_size: dp(6)
-                color: 0.7, 0.7, 0.7, 1
-                size_hint_y: None
-                height: dp(8)
-                halign: 'center'
+            canvas:
+                # Knob background
+                Color:
+                    rgba: 0.2, 0.2, 0.2, 1
+                Ellipse:
+                    pos: self.pos
+                    size: self.size
+                
+                # Knob track (full circle)
+                Color:
+                    rgba: 0.35, 0.35, 0.35, 1
+                Line:
+                    circle: (self.center_x, self.center_y, dp(12))
+                    width: dp(2)
+                
+                # Knob value arc (only the active portion)
+                Color:
+                    rgba: 0.6, 0.6, 0.6, 1
+                Line:
+                    circle: (self.center_x, self.center_y, dp(12), -135 + (root.pan + 1) * 135, -135)
+                    width: dp(3)
+                    cap: 'round'
+                
+                # Center dot
+                Color:
+                    rgba: 0.3, 0.3, 0.3, 1
+                Ellipse:
+                    pos: self.center_x - dp(5), self.center_y - dp(5)
+                    size: dp(10), dp(10)
+                
+                # Knob indicator
+                PushMatrix
+                Rotate:
+                    angle: (root.pan) * 135  # -135 to +135 degrees
+                    origin: self.center
+                Color:
+                    rgba: 0.9, 0.9, 0.9, 1
+                Rectangle:
+                    pos: self.center_x - dp(0.5), self.center_y + dp(7)
+                    size: dp(1), dp(5)
+                PopMatrix
         
-        # Send C
-        BoxLayout:
-            orientation: 'vertical'
-            spacing: dp(1)
-            
-            MixerKnob:
-                value: root.send_c
-                on_touch_down:
-                    if self.collide_point(*args[1].pos): \
-                    root.send_c = self.value
-            
-            Label:
-                text: "C"
-                font_size: dp(6)
-                color: 0.7, 0.7, 0.7, 1
-                size_hint_y: None
-                height: dp(8)
-                halign: 'center'
-
-    # Mute / Solo / Arm - compact
+        Label:
+            text: "C" if abs(root.pan) < 0.05 else (f"L{int(abs(root.pan)*100)}" if root.pan < 0 else f"R{int(root.pan*100)}")
+            size_hint_y: None
+            height: dp(10)  # Smaller
+            font_size: dp(7)
+            color: 0.7, 0.7, 0.7, 1
+            halign: 'center'
+    
+    # Sends Section - ROTARY KNOBS
     BoxLayout:
-        size_hint: 1, None
-        height: dp(18)  # Reduced height
-        spacing: dp(2)  # Tight spacing
-
-        Button:
-            text: "M"
-            font_size: dp(8)  # Smaller font
-            bold: True
-            background_normal: ''
-            background_color: (1, 0.6, 0.2, 1) if root.is_mute else (0.25, 0.25, 0.25, 1)
-            color: (1, 1, 1, 1) if root.is_mute else (0.7, 0.7, 0.7, 1)
-            on_release: root.is_mute = not root.is_mute
-            
-        Button:
-            text: "S"
+        orientation: 'vertical'
+        size_hint_y: None
+        height: dp(75)  # Reduced height
+        spacing: dp(2)
+        
+        Label:
+            text: "SENDS"
+            size_hint_y: None
+            height: dp(10)  # Smaller
             font_size: dp(8)
-            bold: True
-            background_normal: ''
-            background_color: (0.2, 0.6, 1, 1) if root.is_solo else (0.25, 0.25, 0.25, 1)
-            color: (1, 1, 1, 1) if root.is_solo else (0.7, 0.7, 0.7, 1)
-            on_release: root.is_solo = not root.is_solo
+            color: 0.8, 0.8, 0.8, 1
+            halign: 'center'
+        
+        # Send Knobs Row
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: dp(55)  # Reduced height
+            spacing: dp(2)  # Reduced spacing
             
-        Button:
-            text: "A"
-            font_size: dp(8)
-            bold: True
-            background_normal: ''
-            background_color: (0.2, 0.8, 0.4, 1) if root.is_arm else (0.25, 0.25, 0.25, 1)
-            color: (1, 1, 1, 1) if root.is_arm else (0.7, 0.7, 0.7, 1)
-            on_release: root.is_arm = not root.is_arm
+            # Send A Knob
+            BoxLayout:
+                orientation: 'vertical'
+                spacing: dp(1)
+                
+                Widget:
+                    id: send_a_knob
+                    size_hint: None, None
+                    size: dp(20), dp(20)  # Smaller knobs
+                    pos_hint: {'center_x': 0.5}
+                    on_touch_down: root._on_send_knob_touch_down(args[1], 'A') if self.collide_point(*args[1].pos) else None
+                    on_touch_move: root._on_send_knob_touch_move(args[1], 'A') if self.collide_point(*args[1].pos) else None
+                    
+                    canvas:
+                        # Knob background
+                        Color:
+                            rgba: 0.2, 0.2, 0.2, 1
+                        Ellipse:
+                            pos: self.pos
+                            size: self.size
+                        
+                        # Knob track
+                        Color:
+                            rgba: 0.35, 0.35, 0.35, 1
+                        Line:
+                            circle: (self.center_x, self.center_y, dp(8))
+                            width: dp(1.5)
+                        
+                        # Knob value arc
+                        Color:
+                            rgba: 0.6, 0.6, 0.6, 1
+                        Line:
+                            circle: (self.center_x, self.center_y, dp(8), -135, -135 + root.send_a * 270)
+                            width: dp(2)
+                            cap: 'round'
+                        
+                        # Center dot
+                        Color:
+                            rgba: 0.3, 0.3, 0.3, 1
+                        Ellipse:
+                            pos: self.center_x - dp(3), self.center_y - dp(3)
+                            size: dp(6), dp(6)
+                        
+                        # Knob indicator
+                        PushMatrix
+                        Rotate:
+                            angle: -135 + root.send_a * 270
+                            origin: self.center
+                        Color:
+                            rgba: 0.9, 0.9, 0.9, 1
+                        Rectangle:
+                            pos: self.center_x - dp(0.5), self.center_y + dp(5)
+                            size: dp(1), dp(3)
+                        PopMatrix
+                
+                Label:
+                    text: "A"
+                    size_hint_y: None
+                    height: dp(8)
+                    font_size: dp(7)
+                    color: 0.7, 0.7, 0.7, 1
+                    halign: 'center'
+                
+                Label:
+                    text: f"{int(root.send_a * 100)}"
+                    size_hint_y: None
+                    height: dp(8)
+                    font_size: dp(6)
+                    color: 0.6, 0.6, 0.6, 1
+                    halign: 'center'
+            
+            # Send B Knob
+            BoxLayout:
+                orientation: 'vertical'
+                spacing: dp(1)
+                
+                Widget:
+                    id: send_b_knob
+                    size_hint: None, None
+                    size: dp(20), dp(20)
+                    pos_hint: {'center_x': 0.5}
+                    on_touch_down: root._on_send_knob_touch_down(args[1], 'B') if self.collide_point(*args[1].pos) else None
+                    on_touch_move: root._on_send_knob_touch_move(args[1], 'B') if self.collide_point(*args[1].pos) else None
+                    
+                    canvas:
+                        Color:
+                            rgba: 0.2, 0.2, 0.2, 1
+                        Ellipse:
+                            pos: self.pos
+                            size: self.size
+                        Color:
+                            rgba: 0.35, 0.35, 0.35, 1
+                        Line:
+                            circle: (self.center_x, self.center_y, dp(8))
+                            width: dp(1.5)
+                        Color:
+                            rgba: 0.6, 0.6, 0.6, 1
+                        Line:
+                            circle: (self.center_x, self.center_y, dp(8), -135, -135 + root.send_b * 270)
+                            width: dp(2)
+                            cap: 'round'
+                        Color:
+                            rgba: 0.3, 0.3, 0.3, 1
+                        Ellipse:
+                            pos: self.center_x - dp(3), self.center_y - dp(3)
+                            size: dp(6), dp(6)
+                        PushMatrix
+                        Rotate:
+                            angle: -135 + root.send_b * 270
+                            origin: self.center
+                        Color:
+                            rgba: 0.9, 0.9, 0.9, 1
+                        Rectangle:
+                            pos: self.center_x - dp(0.5), self.center_y + dp(5)
+                            size: dp(1), dp(3)
+                        PopMatrix
+                
+                Label:
+                    text: "B"
+                    size_hint_y: None
+                    height: dp(8)
+                    font_size: dp(7)
+                    color: 0.7, 0.7, 0.7, 1
+                    halign: 'center'
+                
+                Label:
+                    text: f"{int(root.send_b * 100)}"
+                    size_hint_y: None
+                    height: dp(8)
+                    font_size: dp(6)
+                    color: 0.6, 0.6, 0.6, 1
+                    halign: 'center'
+            
+            # Send C Knob
+            BoxLayout:
+                orientation: 'vertical'
+                spacing: dp(1)
+                
+                Widget:
+                    id: send_c_knob
+                    size_hint: None, None
+                    size: dp(20), dp(20)
+                    pos_hint: {'center_x': 0.5}
+                    on_touch_down: root._on_send_knob_touch_down(args[1], 'C') if self.collide_point(*args[1].pos) else None
+                    on_touch_move: root._on_send_knob_touch_move(args[1], 'C') if self.collide_point(*args[1].pos) else None
+                    
+                    canvas:
+                        Color:
+                            rgba: 0.2, 0.2, 0.2, 1
+                        Ellipse:
+                            pos: self.pos
+                            size: self.size
+                        Color:
+                            rgba: 0.35, 0.35, 0.35, 1
+                        Line:
+                            circle: (self.center_x, self.center_y, dp(8))
+                            width: dp(1.5)
+                        Color:
+                            rgba: 0.6, 0.6, 0.6, 1
+                        Line:
+                            circle: (self.center_x, self.center_y, dp(8), -135, -135 + root.send_c * 270)
+                            width: dp(2)
+                            cap: 'round'
+                        Color:
+                            rgba: 0.3, 0.3, 0.3, 1
+                        Ellipse:
+                            pos: self.center_x - dp(3), self.center_y - dp(3)
+                            size: dp(6), dp(6)
+                        PushMatrix
+                        Rotate:
+                            angle: -135 + root.send_c * 270
+                            origin: self.center
+                        Color:
+                            rgba: 0.9, 0.9, 0.9, 1
+                        Rectangle:
+                            pos: self.center_x - dp(0.5), self.center_y + dp(5)
+                            size: dp(1), dp(3)
+                        PopMatrix
+                
+                Label:
+                    text: "C"
+                    size_hint_y: None
+                    height: dp(8)
+                    font_size: dp(7)
+                    color: 0.7, 0.7, 0.7, 1
+                    halign: 'center'
+                
+                Label:
+                    text: f"{int(root.send_c * 100)}"
+                    size_hint_y: None
+                    height: dp(8)
+                    font_size: dp(6)
+                    color: 0.6, 0.6, 0.6, 1
+                    halign: 'center'

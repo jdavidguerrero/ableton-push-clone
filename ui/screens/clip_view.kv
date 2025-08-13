@@ -30,10 +30,10 @@
                     size_hint_y: None
                     height: dp(10)
                 
-                # Track Headers - FIXED, NO SCROLL INTERFERENCE
+                # Track Headers - FIXED
                 BoxLayout:
                     size_hint_y: None
-                    height: dp(30)
+                    height: dp(40)  # Slightly taller
                     canvas.before:
                         Color:
                             rgba: 0.1, 0.1, 0.1, 1
@@ -53,48 +53,20 @@
                             width: self.minimum_width
                             spacing: 0
                 
-                # Content ScrollView - SEPARATE, NO INTERFERENCE
+                # Clips ScrollView - FULL HEIGHT NOW
                 ScrollView:
                     id: content_scroll
-                    size_hint_y: None
-                    height: dp(240)  # Fixed height for content
                     do_scroll_y: True   # Vertical scroll for scenes
                     do_scroll_x: True   # Horizontal scroll for tracks
-                    on_scroll_x: root._sync_header_scroll(self.scroll_x)  # Sync headers
+                    on_scroll_x: root._sync_header_scroll(self.scroll_x)
                     
                     BoxLayout:
-                        orientation: 'vertical'
+                        id: clips_container
+                        orientation: 'horizontal'
                         size_hint_x: None
                         width: self.minimum_width
                         size_hint_y: None
-                        height: self.minimum_height
-                        spacing: 0
-                        
-                        # Clips area (without headers)
-                        BoxLayout:
-                            id: clips_container
-                            orientation: 'horizontal'
-                            size_hint_x: None
-                            width: self.minimum_width
-                            size_hint_y: None
-                            height: dp(240)  # 12 scenes * 20px = 240px
-                        
-                        # Mixers below clips
-                        BoxLayout:
-                            id: mixers_container
-                            orientation: 'horizontal'
-                            size_hint_x: None
-                            width: self.minimum_width
-                            size_hint_y: None
-                            height: dp(90) if root.mixer_visible else 0
-                            opacity: 1 if root.mixer_visible else 0
-                            spacing: dp(2)
-                            canvas.before:
-                                Color:
-                                    rgba: 0.08, 0.08, 0.08, 1
-                                Rectangle:
-                                    pos: self.pos
-                                    size: self.size
+                        height: dp(240)  # Fixed height for 12 scenes
                 
                 # Bottom spacer
                 Widget:
@@ -103,39 +75,6 @@
             
             # Right spacer
             Widget:
-        
-        # Mixer Toggle Button
-        BoxLayout:
-            size_hint_y: None
-            height: dp(30)
-            padding: dp(10), dp(5)
-            canvas.before:
-                Color:
-                    rgba: 0.05, 0.05, 0.05, 1
-                Rectangle:
-                    pos: self.pos
-                    size: self.size
-            
-            Label:
-                text: "MIXER"
-                font_size: dp(12)
-                bold: True
-                color: 0.9, 0.9, 0.9, 1
-                size_hint_x: None
-                width: dp(60)
-                halign: 'left'
-                valign: 'middle'
-            
-            Widget:
-            
-            Button:
-                text: "HIDE MIXER" if root.mixer_visible else "SHOW MIXER"
-                size_hint_x: None
-                width: dp(100)
-                height: dp(20)
-                font_size: dp(10)
-                background_color: 0.4, 0.4, 0.4, 1
-                on_release: root.toggle_mixer()
         
         # Status Bar 
         StatusBar:

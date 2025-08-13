@@ -2,11 +2,11 @@
     size_hint_y: None
     height: dp(60)
     orientation: 'horizontal'
-    spacing: dp(8)  # Menos spacing entre botones
-    padding: [dp(18), dp(10)]  # Mejor padding
+    spacing: dp(6)  # Less spacing for 5 buttons
+    padding: [dp(15), dp(10)]
     canvas.before:
         Color:
-            rgba: 0.08, 0.08, 0.08, 1  # Dark background
+            rgba: 0.08, 0.08, 0.08, 1
         Rectangle:
             pos: self.pos
             size: self.size
@@ -21,8 +21,8 @@
         on_release: root.set_active(0)
 
     NavButton:
-        text: "Devices"
-        icon_source: "devices.png"
+        text: "Mixer"
+        icon_source: "mixer.png"  # NEW ICON NEEDED
         active: root.selected_index == 1
         size_hint_y: None
         height: dp(40)
@@ -30,8 +30,8 @@
         on_release: root.set_active(1)
 
     NavButton:
-        text: "Note"
-        icon_source: "note.png"
+        text: "Devices"
+        icon_source: "devices.png"
         active: root.selected_index == 2
         size_hint_y: None
         height: dp(40)
@@ -39,10 +39,19 @@
         on_release: root.set_active(2)
 
     NavButton:
-        text: "Settings"
-        icon_source: "settings.png"
+        text: "Note"
+        icon_source: "note.png"
         active: root.selected_index == 3
         size_hint_y: None
         height: dp(40)
         pos_hint: {'center_y': 0.5}
         on_release: root.set_active(3)
+
+    NavButton:
+        text: "Settings"
+        icon_source: "settings.png"
+        active: root.selected_index == 4
+        size_hint_y: None
+        height: dp(40)
+        pos_hint: {'center_y': 0.5}
+        on_release: root.set_active(4)
