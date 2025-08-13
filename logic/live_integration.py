@@ -304,6 +304,117 @@ class LiveIntegration:
         self.logger.info(f"Live test response: {args}")
         bus.emit("live:connection_confirmed")
     
+    # === ABLETONOSC RESPONSE HANDLERS ===
+    
+    def _handle_track_volume_response(self, address: str, *args):
+        """Handle track volume response from AbletonOSC"""
+        if len(args) >= 2:
+            track_id = int(args[0])
+            value = float(args[1])
+            
+            self.is_syncing = True
+            if self.app_state:
+                self.app_state.set_track_volume(track_id, value)
+            bus.emit("live:track_volume", track=track_id, value=value)
+            self.is_syncing = False
+            self.logger.debug(f"Live volume: Track {track_id} = {value:.2f}")
+    
+    def _handle_track_pan_response(self, address: str, *args):
+        """Handle track pan response from AbletonOSC"""
+        if len(args) >= 2:
+            track_id = int(args[0])
+            value = float(args[1])
+            
+            self.is_syncing = True
+            if self.app_state:
+                self.app_state.set_track_pan(track_id, value)
+            bus.emit("live:track_pan", track=track_id, value=value)
+            self.is_syncing = False
+    
+    def _handle_track_mute_response(self, address: str, *args):
+        """Handle track mute response from AbletonOSC"""
+        if len(args) >= 2:
+            track_id = int(args[0])
+            value = bool(args[1])
+            
+            self.is_syncing = True
+            if self.app_state:
+                self.app_state.set_track_mute(track_id, int(value))
+            bus.emit("live:track_mute", track=track_id, value=value)
+            self.is_syncing = False
+    
+    def _handle_track_solo_response(self, address: str, *args):
+        """Handle track solo response from AbletonOSC"""
+        if len(args) >= 2:
+            track_id = int(args[0])
+            value = bool(args[1])
+            
+            self.is_syncing = True
+            if self.app_state:
+                self.app_state.set_track_solo(track_id, int(value))
+            bus.emit("live:track_solo", track=track_id, value=value)
+            self.is_syncing = False
+    
+    def _handle_track_arm_response(self, address: str, *args):
+        """Handle track arm response from AbletonOSC"""
+        if len(args) >= 2:
+            track_id = int(args[0])
+            value = bool(args[1])
+            
+            self.is_syncing = True
+            if self.app_state:
+                self.app_state.set_track_arm(track_id, int(value))
+            bus.emit("live:track_arm", track=track_id, value=value)
+            self.is_syncing = False
+    
+    def _handle_track_name_response(self, address: str, *args):
+        """Handle track name response from AbletonOSC"""
+        if len(args) >= 2:
+            track_id = int(args[0])
+            name = str(args[1])
+            bus.emit("live:track_name", track=track_id, name=name)
+            self.logger.debug(f"Live track name: Track {track_id} = '{name}'")
+    
+    def _handle_clip_status_response(self, address: str, *args):
+        """Handle clip status response from AbletonOSC"""
+        if len(args) >= 3:
+            track_id = int(args[0])
+            scene_id = int(args[1])
+            status = str(args[2])
+            
+            self.is_syncing = True
+            if self.app_state:
+                self.app_state.set_clip_status(track_id, scene_id, status)
+            bus.emit("live:clip_status", track=track_id, scene=scene_id, status=status)
+            self.is_syncing = False
+    
+    def _handle_clip_name_response(self, address: str, *args):
+        """Handle clip name response from AbletonOSC"""
+        if len(args) >= 3:
+            track_id = int(args[0])
+            scene_id = int(args[1])
+            name = str(args[2])
+            bus.emit("live:clip_name", track=track_id, scene=scene_id, name=name)
+    
+    def _handle_tempo_response(self, address: str, *args):
+        """Handle tempo response from AbletonOSC"""
+        if len(args) > 0:
+            bpm = float(args[0])
+            bus.emit("live:tempo", bpm=bpm)
+            self.logger.debug(f"Live tempo: {bpm} BPM")
+    
+    def _handle_track_names_response(self, address: str, *args):
+        """Handle track names response from AbletonOSC"""
+        if args:
+            track_names = list(args)
+            self.logger.info(f"Live track names: {track_names}")
+            bus.emit("live:track_names", names=track_names)
+    
+    def _handle_live_test(self, address: str, *args):
+        """Handle test response from Live"""
+        self.logger.info(f"✅ Live test response: {args}")
+        bus.emit("live:connection_confirmed")
+    
     def get_status(self) -> dict:
         """Get integration status"""
         return {

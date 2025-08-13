@@ -1,50 +1,65 @@
-<KnobControl@BoxLayout>:
-    orientation: 'vertical'
+#:kivy 2.3.0
+#:import dp kivy.metrics.dp
+#:import math math
+
+<KnobControl>:
     size_hint: None, None
-    size: 60, 107
-    spacing: 2
-    canvas.before:
-        Color:
-            rgba: 0, 0, 0, 0  # Background transparent for now
-        Rectangle:
-            pos: self.pos
-            size: self.size
-
-    # Top Value Label (e.g., 70 Hz)
-    Label:
-        id: knob_value
-        text: root.display_value
-        font_size: 16
-        size_hint_y: None
-        height: 19
-        color: 0.93, 0.93, 0.93, 1
-
-    # Knob Body (Ring + Dot Indicator)
-    RelativeLayout:
-        size_hint: None, None
-        size: 60, 60
-        canvas.before:
-            Color:
-                rgba: 0.17, 0.17, 0.17, 1
-            Ellipse:
-                pos: self.pos
-                size: self.size
+    size: dp(60), dp(80)
+    
+    # Knob properties
+    knob_value: 0.5
+    knob_min: 0.0
+    knob_max: 1.0
+    param_name: "Parameter"
+    display_value: "50%"
+    
+    # Calculated properties
+    indicator_offset_x: math.cos(math.radians(self.angle)) * dp(18)
+    indicator_offset_y: math.sin(math.radians(self.angle)) * dp(18)
+    angle: -135 + (self.knob_value * 270)  # -135° to +135°
+    
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: dp(4)
+        
         Widget:
-            size_hint: None, None
-            size: 6, 6
-            pos: (self.parent.x + self.parent.width / 2 + root.indicator_offset_x,
-                  self.parent.y + self.parent.height / 2 + root.indicator_offset_y)
-            canvas:
+            size_hint_y: None
+            height: dp(50)
+            canvas.before:
                 Color:
-                    rgba: 0.85, 0.85, 0.85, 1
+                    rgba: 0.3, 0.3, 0.3, 1
                 Ellipse:
-                    pos: self.pos
-                    size: self.size
-
-    # Label (e.g., "Filter")
-    Label:
-        text: root.knob_label
-        font_size: 13
-        size_hint_y: None
-        height: 16
-        color: 0.53, 0.53, 0.53, 1
+                    pos: self.x + dp(10), self.y + dp(10)
+                    size: dp(30), dp(30)
+                Color:
+                    rgba: 0.6, 0.6, 0.6, 1
+                Line:
+                    ellipse: (self.x + dp(10), self.y + dp(10), dp(30), dp(30))
+                    width: dp(2)
+                    
+            Widget:
+                size_hint: None, None
+                size: 6, 6
+                pos: (self.parent.x + self.parent.width / 2 + root.indicator_offset_x, self.parent.y + self.parent.height / 2 + root.indicator_offset_y)
+                canvas:
+                    Color:
+                        rgba: 0.85, 0.85, 0.85, 1
+                    Ellipse:
+                        pos: self.pos
+                        size: self.size
+        
+        Label:
+            text: root.display_value
+            size_hint_y: None
+            height: dp(12)
+            font_size: dp(10)
+            color: 0.9, 0.9, 0.9, 1
+            halign: 'center'
+        
+        Label:
+            text: root.param_name
+            size_hint_y: None
+            height: dp(12)
+            font_size: dp(8)
+            color: 0.7, 0.7, 0.7, 1
+            halign: 'center'
