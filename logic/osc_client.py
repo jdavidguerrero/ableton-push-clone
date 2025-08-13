@@ -1,7 +1,6 @@
 import threading
 import logging
 from typing import Callable, Dict, Any, Optional, Tuple
-from pythonosc import osc
 from pythonosc.udp_client import SimpleUDPClient
 from pythonosc.dispatcher import Dispatcher
 from pythonosc.osc_server import BlockingOSCUDPServer

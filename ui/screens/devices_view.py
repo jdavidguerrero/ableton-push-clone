@@ -6,7 +6,12 @@ from typing import Optional, Dict, List
 import logging
 
 class DevicesViewScreen(Screen):
-    """Device control screen with intelligent parameter mapping and navigation"""
+    """Device control screen with track and device navigation"""
+    
+    # Track state
+    current_track = NumericProperty(0)
+    current_track_name = StringProperty("Kick")
+    total_tracks = NumericProperty(8)
     
     # Device state
     current_device_name = StringProperty("Kick")
@@ -23,11 +28,16 @@ class DevicesViewScreen(Screen):
         self.app_state = app_state
         self.logger = logging.getLogger(__name__)
         
-        # Device database
-        self.devices = {
-            "Kick": {
-                "pages": 2,
-                "params": [
+        # Track names (same as ClipView demo tracks)
+        self.track_names = [
+            "Kick", "Hats", "Bass", "Tom", "FX", 
+            "Pad", "Lead", "Keys", "Perc", "Vocal"
+        ]
+        
+        # Track -> Devices mapping (each track can have multiple devices)
+        self.track_devices = {
+            0: {  # Kick track
+                "Kick": {"pages": 2, "params": [
                     # Page 1
                     {"name": "Pitch", "value": 0.6, "display": "60 Hz", "min": 20, "max": 200, "unit": "Hz"},
                     {"name": "Decay", "value": 0.4, "display": "400ms", "min": 0, "max": 2000, "unit": "ms"},
@@ -46,11 +56,20 @@ class DevicesViewScreen(Screen):
                     {"name": "Tone", "value": 0.5, "display": "50%", "min": 0, "max": 100, "unit": "%"},
                     {"name": "Send A", "value": 0.2, "display": "20%", "min": 0, "max": 100, "unit": "%"},
                     {"name": "Send B", "value": 0.0, "display": "0%", "min": 0, "max": 100, "unit": "%"},
-                ]
+                ]},
+                "EQ": {"pages": 1, "params": [
+                    {"name": "Low", "value": 0.5, "display": "0dB", "min": -15, "max": 15, "unit": "dB"},
+                    {"name": "Low Mid", "value": 0.5, "display": "0dB", "min": -15, "max": 15, "unit": "dB"},
+                    {"name": "Hi Mid", "value": 0.5, "display": "0dB", "min": -15, "max": 15, "unit": "dB"},
+                    {"name": "High", "value": 0.5, "display": "0dB", "min": -15, "max": 15, "unit": "dB"},
+                    {"name": "Lo Cut", "value": 0.1, "display": "80Hz", "min": 20, "max": 500, "unit": "Hz"},
+                    {"name": "Hi Cut", "value": 0.9, "display": "12kHz", "min": 1000, "max": 20000, "unit": "Hz"},
+                    {"name": "Gain", "value": 0.6, "display": "3dB", "min": -12, "max": 12, "unit": "dB"},
+                    {"name": "Mix", "value": 1.0, "display": "100%", "min": 0, "max": 100, "unit": "%"},
+                ]}
             },
-            "Serum": {
-                "pages": 3,
-                "params": [
+            1: {  # Hats track
+                "Serum": {"pages": 3, "params": [
                     # Page 1 - Oscillators
                     {"name": "Osc A", "value": 0.8, "display": "Saw", "min": 0, "max": 127, "unit": ""},
                     {"name": "Osc B", "value": 0.3, "display": "Square", "min": 0, "max": 127, "unit": ""},
@@ -78,12 +97,23 @@ class DevicesViewScreen(Screen):
                     {"name": "Distort", "value": 0.1, "display": "10%", "min": 0, "max": 100, "unit": "%"},
                     {"name": "Master", "value": 0.8, "display": "-2dB", "min": -60, "max": 6, "unit": "dB"},
                     {"name": "Velocity", "value": 0.7, "display": "70%", "min": 0, "max": 100, "unit": "%"},
-                ]
-            }
+                ]},
+                "Compressor": {"pages": 1, "params": [
+                    {"name": "Thresh", "value": 0.3, "display": "-12dB", "min": -40, "max": 0, "unit": "dB"},
+                    {"name": "Ratio", "value": 0.6, "display": "4:1", "min": 1, "max": 20, "unit": ":1"},
+                    {"name": "Attack", "value": 0.2, "display": "5ms", "min": 0.1, "max": 100, "unit": "ms"},
+                    {"name": "Release", "value": 0.4, "display": "100ms", "min": 1, "max": 1000, "unit": "ms"},
+                    {"name": "Knee", "value": 0.5, "display": "2dB", "min": 0, "max": 10, "unit": "dB"},
+                    {"name": "Makeup", "value": 0.4, "display": "3dB", "min": 0, "max": 20, "unit": "dB"},
+                    {"name": "Mix", "value": 1.0, "display": "100%", "min": 0, "max": 100, "unit": "%"},
+                    {"name": "Lookahead", "value": 0.3, "display": "3ms", "min": 0, "max": 10, "unit": "ms"},
+                ]}
+            },
+            # Add more tracks...
         }
         
         self._setup_events()
-        self._update_device_info()
+        self._update_track_info()
     
     def _setup_events(self):
         """Setup event handlers for hardware integration"""
@@ -100,9 +130,25 @@ class DevicesViewScreen(Screen):
         if hasattr(self.ids, 'knob_grid'):
             self._set_active_encoder(0)
     
+    def _update_track_info(self):
+        """Update track information and reset to first device"""
+        if self.current_track < len(self.track_names):
+            self.current_track_name = self.track_names[self.current_track]
+        
+        # Get devices for current track
+        track_devices = self.track_devices.get(self.current_track, {})
+        if track_devices:
+            # Set first device as current
+            first_device = list(track_devices.keys())[0]
+            self.current_device_name = first_device
+            self.current_page = 1
+            self._update_device_info()
+            self._update_current_page_params()
+    
     def _update_device_info(self):
         """Update device information and pagination"""
-        device = self.devices.get(self.current_device_name, self.devices["Kick"])
+        track_devices = self.track_devices.get(self.current_track, {})
+        device = track_devices.get(self.current_device_name, {"pages": 1})
         self.total_pages = device["pages"]
         
         # Ensure current page is valid
@@ -111,7 +157,9 @@ class DevicesViewScreen(Screen):
     
     def _update_current_page_params(self):
         """Update parameters for current page"""
-        device = self.devices.get(self.current_device_name, self.devices["Kick"])
+        track_devices = self.track_devices.get(self.current_track, {})
+        device = track_devices.get(self.current_device_name, {"params": []})
+        
         params_per_page = 8
         start_idx = (self.current_page - 1) * params_per_page
         end_idx = start_idx + params_per_page
@@ -163,7 +211,8 @@ class DevicesViewScreen(Screen):
     
     def _adjust_parameter(self, encoder_id: int, delta: float):
         """Adjust parameter value with bounds checking"""
-        device = self.devices.get(self.current_device_name, self.devices["Kick"])
+        track_devices = self.track_devices.get(self.current_track, {})
+        device = track_devices.get(self.current_device_name, {"params": []})
         params_per_page = 8
         param_idx = (self.current_page - 1) * params_per_page + encoder_id
         
@@ -221,26 +270,34 @@ class DevicesViewScreen(Screen):
             return f"{actual_value:.1f}{unit}"
     
     def previous_device(self):
-        """Navigate to previous device"""
-        devices = list(self.devices.keys())
-        current_idx = devices.index(self.current_device_name)
-        new_idx = (current_idx - 1) % len(devices)
-        self.current_device_name = devices[new_idx]
-        self._update_device_info()
-        self._update_current_page_params()
+        """Navigate to previous device IN CURRENT TRACK"""
+        track_devices = self.track_devices.get(self.current_track, {})
+        device_names = list(track_devices.keys())
         
-        bus.emit("device:change", device=self.current_device_name)
+        if device_names and self.current_device_name in device_names:
+            current_idx = device_names.index(self.current_device_name)
+            new_idx = (current_idx - 1) % len(device_names)
+            self.current_device_name = device_names[new_idx]
+            self.current_page = 1  # Reset to first page
+            self._update_device_info()
+            self._update_current_page_params()
+            
+            bus.emit("device:change", device=self.current_device_name, track=self.current_track)
     
     def next_device(self):
-        """Navigate to next device"""
-        devices = list(self.devices.keys())
-        current_idx = devices.index(self.current_device_name)
-        new_idx = (current_idx + 1) % len(devices)
-        self.current_device_name = devices[new_idx]
-        self._update_device_info()
-        self._update_current_page_params()
+        """Navigate to next device IN CURRENT TRACK"""
+        track_devices = self.track_devices.get(self.current_track, {})
+        device_names = list(track_devices.keys())
         
-        bus.emit("device:change", device=self.current_device_name)
+        if device_names and self.current_device_name in device_names:
+            current_idx = device_names.index(self.current_device_name)
+            new_idx = (current_idx + 1) % len(device_names)
+            self.current_device_name = device_names[new_idx]
+            self.current_page = 1  # Reset to first page
+            self._update_device_info()
+            self._update_current_page_params()
+            
+            bus.emit("device:change", device=self.current_device_name, track=self.current_track)
     
     def previous_page(self):
         """Navigate to previous parameter page"""
@@ -263,7 +320,7 @@ class DevicesViewScreen(Screen):
     def _on_device_change(self, **kwargs):
         """Handle device change from external source"""
         new_device = kwargs.get('device')
-        if new_device and new_device in self.devices:
+        if new_device and new_device in self.track_devices.get(self.current_track, {}):
             self.current_device_name = new_device
             self.current_page = 1  # Reset to first page
             self._update_device_info()
@@ -274,14 +331,7 @@ class DevicesViewScreen(Screen):
         track_id = kwargs.get('track', 0)
         
         # Auto-load device based on track (simplified mapping)
-        device_map = {
-            0: "Kick",     # Track 1 -> Kick
-            1: "Serum",    # Track 2 -> Serum
-            # Add more mappings as needed
-        }
-        
-        if track_id in device_map:
-            self.current_device_name = device_map[track_id]
-            self.current_page = 1
-            self._update_device_info()
-            self._update_current_page_params()
+        # This logic needs to be updated to reflect the new track_devices structure
+        # For now, it will just set the current_track and update the track name
+        self.current_track = track_id
+        self._update_track_info()

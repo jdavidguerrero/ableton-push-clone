@@ -26,14 +26,14 @@
             points: [self.x, self.y, self.right, self.y]
             width: 1
     
-    # Previous device button
+    # Previous device button - FIXED
     Button:
         text: "<"
         size_hint: None, None
         size: dp(40), dp(30)
         background_color: 0.15, 0.15, 0.15, 1
         color: 0.7, 0.7, 0.7, 1
-        on_release: root.previous_device()
+        on_release: app.root.current_screen.previous_device() if hasattr(app.root.current_screen, 'previous_device') else None
     
     # Current device display
     BoxLayout:
@@ -67,11 +67,11 @@
                 size: dp(4), dp(14)
                 radius: [dp(2)]
     
-    # Next device button
+    # Next device button - FIXED
     Button:
         text: ">"
         size_hint: None, None
         size: dp(40), dp(30)
         background_color: 0.15, 0.15, 0.15, 1
         color: 0.7, 0.7, 0.7, 1
-        on_release: root.next_device()
+        on_release: app.root.current_screen.next_device() if hasattr(app.root.current_screen, 'next_device') else None
