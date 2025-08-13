@@ -13,6 +13,9 @@ typing-extensions>=4.0.0,<5.0.0
 # Optional: System monitoring (useful for RPi performance)
 psutil>=5.9.0,<6.0.0
 
+# OSC Communication
+python-osc>=1.8.0,<2.0.0
+
 # Optional: Development and testing tools
 # Uncomment for development:
 # pytest>=7.0.0,<8.0.0

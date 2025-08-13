@@ -19,6 +19,7 @@ from kivy.core.window import Window
 from config.config import AppConfig
 from logic.state.app_state import AppState
 from logic.clip_manager import ClipManager
+from logic.live_integration import LiveIntegration
 
 from ui.screens.clip_view import ClipViewScreen
 from ui.screens.devices_view import DevicesViewScreen
@@ -46,6 +47,7 @@ class PushControllerApp(App):
         self.config_app = AppConfig()
         self.state: Optional[AppState] = None
         self.clip_manager: Optional[ClipManager] = None
+        self.live_integration: Optional[LiveIntegration] = None  # ADD THIS
         
     def build(self):
         # 1. Apply configuration
@@ -117,6 +119,15 @@ class PushControllerApp(App):
         self.state.init_project(tracks=8, scenes=12)
         
         self.clip_manager = ClipManager(self.state)
+        
+        # Initialize Live integration
+        self.live_integration = LiveIntegration(self.state)
+        
+        # Try to connect (will fail gracefully if Live not running)
+        try:
+            self.live_integration.connect()
+        except Exception as e:
+            self.logger.warning(f"Could not connect to Live on startup: {e}")
     
     def _setup_window(self):
         """Setup window events and properties"""
@@ -142,6 +153,12 @@ class PushControllerApp(App):
         """Close the application"""
         self.logger.info("Application closing...")
         self.stop()
+    
+    def on_stop(self):
+        """Cleanup on app shutdown"""
+        if self.live_integration:
+            self.live_integration.disconnect()
+        return super().on_stop()
     
     def _create_ui(self):
         """Create user interface"""
