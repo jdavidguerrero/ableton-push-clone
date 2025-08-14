@@ -1,6 +1,8 @@
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import NumericProperty, StringProperty, BooleanProperty
 from kivy.clock import Clock
+from logic.bus import bus
+import logging
 
 class ClipSlot(BoxLayout):
     track_index = NumericProperty(0)
@@ -11,6 +13,7 @@ class ClipSlot(BoxLayout):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.logger = logging.getLogger(__name__)
         # peq. auto-anim/refresh si cambian estados
         Clock.schedule_once(lambda *_: self._apply_status())
 

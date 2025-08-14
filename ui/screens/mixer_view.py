@@ -65,7 +65,10 @@ class MixerViewScreen(Screen):
             mixers_container = self.ids.mixers_container
             mixers_container.clear_widgets()
             
-            for track_idx, track in enumerate(self.demo_tracks):
+            # Use Live tracks if available, otherwise demo tracks
+            tracks_to_use = self.demo_tracks if self.demo_tracks else self._create_demo_tracks()
+            
+            for track_idx, track in enumerate(tracks_to_use):
                 # Enhanced mixer widget with better sizing for full screen
                 mixer = TrackVolume(
                     track_index=track_idx,
@@ -86,7 +89,7 @@ class MixerViewScreen(Screen):
                 mixers_container.add_widget(mixer)
             
             # Set container width for scrolling
-            mixers_container.width = len(self.demo_tracks) * 88  # 85 + 3 spacing
+            mixers_container.width = len(tracks_to_use) * 88  # 85 + 3 spacing
     
     # Event Handlers
     def _on_track_volume_changed(self, **kwargs):

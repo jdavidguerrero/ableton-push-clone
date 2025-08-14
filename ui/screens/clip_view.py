@@ -253,6 +253,7 @@ class ClipViewScreen(Screen):
                         track_index=track_idx,
                         scene_index=scene_idx,
                         status=clip_info.get("status", "empty"),
+                        has_content=clip_info.get("has_content", False),  # AGREGAR
                     )
                     slot.label_text = clip_info.get("name", "")
                     clips_column.add_widget(slot)
@@ -323,3 +324,27 @@ class ClipViewScreen(Screen):
             if track_id < len(headers):
                 header = headers[-(track_id + 1)]  # Kivy reverses children
                 header.color_rgba = color
+
+def _update_clip_content_visual(self, track_id, scene_id, has_content):
+    """Update clip visual to show if it has content"""
+    if hasattr(self.ids, 'clips_container'):
+        # Encontrar el widget ClipSlot específico y actualizar
+        clips_container = self.ids.clips_container
+        if track_id < len(clips_container.children):
+            # Kivy reversa el orden de children
+            track_column = clips_container.children[-(track_id + 1)]
+            if scene_id < len(track_column.children):
+                clip_slot = track_column.children[-(scene_id + 1)]
+                clip_slot.has_content = has_content
+                self.logger.debug(f"📁 Updated clip T{track_id}S{scene_id} content: {has_content}")
+
+def _update_clip_visual(self, track_id, scene_id, status):
+    """Update clip status visual"""
+    if hasattr(self.ids, 'clips_container'):
+        clips_container = self.ids.clips_container
+        if track_id < len(clips_container.children):
+            track_column = clips_container.children[-(track_id + 1)]
+            if scene_id < len(track_column.children):
+                clip_slot = track_column.children[-(scene_id + 1)]
+                clip_slot.status = status
+                self.logger.debug(f"🎵 Updated clip T{track_id}S{scene_id} status: {status}")
