@@ -6,7 +6,6 @@ from typing import Optional
 import logging
 
 class ClipViewScreen(Screen):
-    """Main clip view screen - SIMPLIFIED, NO MIXER"""
     
     # Track state
     focused_track = NumericProperty(0)
@@ -40,12 +39,23 @@ class ClipViewScreen(Screen):
         """Called when screen becomes active"""
         self.logger.info("Entering Clip View")
         
-        if self.live_integration and self.live_integration.osc_client.is_connected:
+        # DEBUG: Verificar estado de integración
+        self.logger.info(f"🔍 Live integration: {self.live_integration}")
+        
+        if self.live_integration:
+            self.logger.info(f"🔍 Live integration status: {self.live_integration.get_status()}")
+            if self.live_integration.osc_client:
+                self.logger.info(f"🔍 OSC client connected: {self.live_integration.osc_client.is_connected}")
+        else:
+            self.logger.error("❌ No live_integration provided to ClipView!")
+        
+        if self.live_integration and self.live_integration.osc_client and self.live_integration.osc_client.is_connected:
             # Usar datos reales de Live
+            self.logger.info("📡 Using REAL Live data")
             self._request_live_data()
         else:
             # Fallback a datos demo si Live no conectado
-            self.logger.warning("Live not connected, using demo data")
+            self.logger.warning("⚠️ Live not connected, using DEMO data")
             self._use_demo_data()
     
     def _create_demo_tracks(self):
