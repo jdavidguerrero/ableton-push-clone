@@ -147,19 +147,33 @@ class OSCClient:
     def _run_server(self):
         """Server main loop (runs in background thread)"""
         try:
-            # MEJORADO: Server loop con shutdown event
+            # Set timeout for non-blocking operation
+            self.server.timeout = 1.0  # 1 second timeout
+            
+            self.logger.info(f"🎧 OSC Server thread started, waiting for messages...")
+            
             while not self._shutdown_event.is_set() and self.is_server_running:
                 try:
-                    self.server.handle_request()  # Non-blocking con timeout
+                    # This will now timeout after 1 second
+                    self.server.handle_request()
+                    
+                except socket.timeout:
+                    # Normal timeout, continue loop
+                    continue
+                    
                 except OSError as e:
                     if self.is_server_running:  # Solo log si no es shutdown intencional
-                        self.logger.debug(f"OSC Server handle_request error: {e}")
+                        self.logger.warning(f"OSC Server handle_request error: {e}")
+                        # Don't break immediately, try to continue
+                        continue
+                    else:
                         break
+                        
         except Exception as e:
             if self.is_server_running:  # Only log if unexpected shutdown
                 self.logger.error(f"OSC Server error: {e}")
         finally:
-            self.logger.debug("OSC Server thread exiting")
+            self.logger.info("🎧 OSC Server thread exiting")
     
     def _start_ping_monitor(self):
         """Start background ping monitoring"""
@@ -241,14 +255,19 @@ class OSCClient:
     def _handle_any_message(self, address: str, *args):
         """Handle any incoming OSC message (catch-all)"""
         self.messages_received += 1
-        self.logger.info(f"🌐 ANY OSC MESSAGE: {address} {args}")
+        self.logger.info(f"🌐 CAUGHT MESSAGE: {address} {args}")
         
-        # También intentar llamar handlers específicos
-        if address in self.handlers:
-            try:
-                self.handlers[address](address, *args)
-            except Exception as e:
-                self.logger.error(f"Error calling handler for {address}: {e}")
+        # Log raw info for debugging
+        self.logger.debug(f"🔍 Message details: address='{address}', args={args}, type={type(args)}")
+        
+        # Try to call specific handlers
+        for pattern, handler in self.handlers.items():
+            if pattern == address or pattern == "/*":
+                try:
+                    self.logger.debug(f"🎯 Calling handler for pattern: {pattern}")
+                    handler(address, *args)
+                except Exception as e:
+                    self.logger.error(f"Error in handler {pattern}: {e}")
     
     def get_connection_info(self) -> Dict[str, Any]:
         """Get connection status and statistics"""
