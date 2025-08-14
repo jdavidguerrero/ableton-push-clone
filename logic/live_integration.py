@@ -545,3 +545,19 @@ class LiveIntegration:
         else:
             # Color por defecto
             return (0.5, 0.5, 0.5, 1.0)
+
+    def _on_mixer_volume(self, **kwargs):
+        """Handle mixer volume changes (same as track volume)"""
+        self._on_track_volume(**kwargs)
+
+    def _on_mixer_pan(self, **kwargs):
+        """Handle mixer pan changes (same as track pan)"""
+        self._on_track_pan(**kwargs)
+
+    def _on_mixer_mute(self, **kwargs):
+        """Handle mixer mute changes (same as track mute)"""
+        self._on_track_mute(**kwargs)
+
+    def _on_mixer_solo(self, **kwargs):
+        """Handle mixer solo changes (same as track solo)"""
+        self._on_track_solo(**kwargs)
