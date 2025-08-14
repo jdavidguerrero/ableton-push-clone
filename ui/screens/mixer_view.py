@@ -35,7 +35,8 @@ class MixerViewScreen(Screen):
         bus.on("track:solo", self._on_track_solo_changed)
         bus.on("track:arm", self._on_track_arm_changed)
         bus.on("track:send", self._on_track_send_changed)
-    
+        bus.on("live:track_names", self._on_live_track_names)  # NUEVO
+
     def on_enter(self):
         """Called when screen becomes active"""
         self.logger.info("Entering Mixer View")
@@ -143,3 +144,35 @@ class MixerViewScreen(Screen):
         
         if self.app_state:
             self.app_state.set_track_send(track, send, value)
+
+def _on_live_track_names(self, **kwargs):
+    """Update mixer with real Live tracks"""
+    names = kwargs.get('names', [])
+    self.logger.info(f"🎚️ Mixer updated with {len(names)} tracks from Live")
+    
+    # Update demo tracks with real names
+    self.demo_tracks = []
+    for i, name in enumerate(names):
+        track = {
+            "name": name,
+            "color": self._get_track_color(i)
+        }
+        self.demo_tracks.append(track)
+    
+    # Refresh UI if screen is active
+    if hasattr(self, 'ids') and hasattr(self.ids, 'mixers_container'):
+        self._populate_mixers()
+
+def _get_track_color(self, track_index):
+    """Get default color for track"""
+    colors = [
+        (0, 0.016, 1, 1),      # Azul
+        (0, 1, 0.05, 1),       # Verde
+        (1, 0.6, 0, 1),        # Naranja
+        (1, 0.85, 0, 1),       # Amarillo
+        (1, 0, 0.48, 1),       # Rosa
+        (0, 1, 0.97, 1),       # Cyan
+        (1, 0.57, 0, 1),       # Naranja claro
+        (0.8, 0.2, 0.8, 1),    # Morado
+    ]
+    return colors[track_index % len(colors)]
