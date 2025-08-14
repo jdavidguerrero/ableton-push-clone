@@ -99,11 +99,7 @@ class ClipViewScreen(Screen):
         # Solicitar número de scenes
         osc.send_message("/live/song/get/num_scenes")
         
-        # Solicitar estados de clips (primeros 8 tracks x 12 scenes)
-        for track_id in range(8):
-            for scene_id in range(12):
-                osc.send_message("/live/clip/get/playing_status", track_id, scene_id)
-                osc.send_message("/live/clip/get/name", track_id, scene_id)
+        # NO solicitar clips aquí - hacerlo después de recibir track_names
 
     def _on_live_track_names(self, **kwargs):
         """Handle track names from Live"""
@@ -112,10 +108,10 @@ class ClipViewScreen(Screen):
         
         # Crear estructura de tracks con datos reales
         self.live_tracks = []
-        for i, name in enumerate(names[:8]):  # Máximo 8 tracks
+        for i, name in enumerate(names):  # No limitar a 8
             track = {
                 "name": name,
-                "color": self._get_track_color(i),  # Colores por defecto
+                "color": self._get_track_color(i),
                 "clips": [{"status": "empty", "name": ""} for _ in range(12)]
             }
             self.live_tracks.append(track)
@@ -123,6 +119,12 @@ class ClipViewScreen(Screen):
         # Poblar UI con datos reales
         self._populate_headers()
         self._populate_clips()
+        
+        # AHORA solicitar clips para el número real de tracks
+        for track_id in range(len(names)):
+            for scene_id in range(12):
+                osc.send_message("/live/clip/get/playing_status", track_id, scene_id)
+                osc.send_message("/live/clip/get/name", track_id, scene_id)
 
     def _on_live_clip_status(self, **kwargs):
         """Handle clip status updates from Live"""
@@ -185,7 +187,9 @@ class ClipViewScreen(Screen):
             clips_container = self.ids.clips_container
             clips_container.clear_widgets()
             
-            for track_idx, track in enumerate(self.demo_tracks):
+            tracks_to_use = self.live_tracks if self.live_tracks else self._create_demo_tracks()
+            
+            for track_idx, track in enumerate(tracks_to_use):
                 # Create clips column for this track
                 clips_column = BoxLayout(
                     orientation='vertical',
@@ -208,7 +212,7 @@ class ClipViewScreen(Screen):
                 
                 clips_container.add_widget(clips_column)
             
-            clips_container.width = len(self.demo_tracks) * 88
+            clips_container.width = len(tracks_to_use) * 88
     
     def _sync_header_scroll(self, scroll_x):
         """Sync header scroll with content scroll"""
@@ -217,9 +221,10 @@ class ClipViewScreen(Screen):
     
     def _focus_track(self, track_id: int):
         """Focus on a specific track"""
-        if 0 <= track_id < len(self.demo_tracks):
+        tracks_to_use = self.live_tracks if self.live_tracks else self._create_demo_tracks()
+        if 0 <= track_id < len(tracks_to_use):
             self.focused_track = track_id
-            self.current_track_text = self.demo_tracks[track_id]["name"]
+            self.current_track_text = tracks_to_use[track_id]["name"]
             
             # Emit focus event
             bus.emit("track:focus", track=track_id)
@@ -237,8 +242,8 @@ class ClipViewScreen(Screen):
         status = kwargs.get('status', 'empty')
         
         # Update demo data to reflect changes
-        if 0 <= track < len(self.demo_tracks) and 0 <= scene < len(self.demo_tracks[track]["clips"]):
-            self.demo_tracks[track]["clips"][scene]["status"] = status
+        if 0 <= track < len(self.live_tracks) and 0 <= scene < len(self.live_tracks[track]["clips"]):
+            self.live_tracks[track]["clips"][scene]["status"] = status
             self.logger.debug(f"Clip changed: T{track}S{scene} -> {status}")
 
     def _on_live_connected(self, **kwargs):
