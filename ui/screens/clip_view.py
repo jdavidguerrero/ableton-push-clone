@@ -121,6 +121,7 @@ class ClipViewScreen(Screen):
         self._populate_clips()
         
         # AHORA solicitar clips para el número real de tracks
+        osc = self.live_integration.osc_client
         for track_id in range(len(names)):
             for scene_id in range(12):
                 osc.send_message("/live/clip/get/playing_status", track_id, scene_id)

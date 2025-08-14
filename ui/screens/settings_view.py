@@ -17,8 +17,9 @@ class SettingsViewScreen(Screen):
     osc_ip = StringProperty("192.168.80.33")
     osc_port = NumericProperty(11000)
     
-    def __init__(self, **kwargs):
+    def __init__(self, live_integration=None, **kwargs):
         super().__init__(**kwargs)
+        self.live_integration = live_integration  # AGREGAR ESTO
         self.logger = logging.getLogger(__name__)
     
     def on_enter(self):

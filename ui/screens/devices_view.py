@@ -23,9 +23,10 @@ class DevicesViewScreen(Screen):
     # Device parameters (8 per page)
     device_params = ListProperty([])
     
-    def __init__(self, app_state=None, **kwargs):
+    def __init__(self, app_state=None, live_integration=None, **kwargs):
         super().__init__(**kwargs)
         self.app_state = app_state
+        self.live_integration = live_integration  # AGREGAR ESTO
         self.logger = logging.getLogger(__name__)
         
         # Track names (same as ClipView demo tracks)
