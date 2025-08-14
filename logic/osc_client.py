@@ -54,7 +54,7 @@ class OSCClient:
         self.register_handler("/push/status", self._handle_status)  # CORREGIDO: Era /live/status
         
         # Error handling
-        self.dispatcher.set_default_handler(self._handle_unknown_message)
+        self.dispatcher.set_default_handler(self._handle_any_message)
     
     def connect(self) -> bool:
         """Establish connection to Live"""
@@ -216,7 +216,8 @@ class OSCClient:
         def wrapped_handler(address: str, *args):
             try:
                 self.messages_received += 1
-                self.logger.debug(f"OSC Received: {address} {args}")
+                # CAMBIAR DEBUG POR INFO para ver los mensajes
+                self.logger.info(f"📥 OSC RECEIVED: {address} {args}")
                 handler(address, *args)
             except Exception as e:
                 self.logger.error(f"Error in OSC handler {pattern}: {e}")
@@ -236,6 +237,18 @@ class OSCClient:
     def _handle_unknown_message(self, address: str, *args):
         """Handle unknown/unmapped OSC messages"""
         self.logger.debug(f"Unknown OSC message: {address} {args}")
+    
+    def _handle_any_message(self, address: str, *args):
+        """Handle any incoming OSC message (catch-all)"""
+        self.messages_received += 1
+        self.logger.info(f"🌐 ANY OSC MESSAGE: {address} {args}")
+        
+        # También intentar llamar handlers específicos
+        if address in self.handlers:
+            try:
+                self.handlers[address](address, *args)
+            except Exception as e:
+                self.logger.error(f"Error calling handler for {address}: {e}")
     
     def get_connection_info(self) -> Dict[str, Any]:
         """Get connection status and statistics"""
