@@ -339,50 +339,50 @@ class DevicesViewScreen(Screen):
         self.current_track = track_id
         self._update_track_info()
 
-def _on_live_track_names(self, **kwargs):
-    """Update track names from Live"""
-    names = kwargs.get('names', [])
-    self.track_names = names[:16]  # Máximo 16 tracks para mostrar
-    self.total_tracks = len(self.track_names)
-    self.logger.info(f"🎛️ Devices View updated with {len(names)} tracks from Live")
-    self._update_track_info()
+    def _on_live_track_names(self, **kwargs):
+        """Update track names from Live"""
+        names = kwargs.get('names', [])
+        self.track_names = names[:16]  # Máximo 16 tracks para mostrar
+        self.total_tracks = len(self.track_names)
+        self.logger.info(f"🎛️ Devices View updated with {len(names)} tracks from Live")
+        self._update_track_info()
 
-def _on_live_devices(self, **kwargs):
-    """Update device data from Live"""
-    track_id = kwargs.get('track', 0)
-    devices = kwargs.get('devices', [])
-    
-    self.logger.info(f"🎚️ Received devices for track {track_id}: {devices}")
-    
-    # Update device mapping with real Live data
-    if track_id not in self.track_devices:
-        self.track_devices[track_id] = {}
-    
-    for device in devices:
-        device_name = device.get('name', 'Unknown Device')
-        params = device.get('parameters', [])
+    def _on_live_devices(self, **kwargs):
+        """Update device data from Live"""
+        track_id = kwargs.get('track', 0)
+        devices = kwargs.get('devices', [])
         
-        # Convert Live device data to our format
-        self.track_devices[track_id][device_name] = {
-            "pages": max(1, len(params) // 8),
-            "params": self._convert_live_params(params)
-        }
-    
-    # Update UI if we're viewing this track
-    if self.current_track == track_id:
-        self._update_device_info()
-        self._update_current_page_params()
+        self.logger.info(f"🎚️ Received devices for track {track_id}: {devices}")
+        
+        # Update device mapping with real Live data
+        if track_id not in self.track_devices:
+            self.track_devices[track_id] = {}
+        
+        for device in devices:
+            device_name = device.get('name', 'Unknown Device')
+            params = device.get('parameters', [])
+            
+            # Convert Live device data to our format
+            self.track_devices[track_id][device_name] = {
+                "pages": max(1, len(params) // 8),
+                "params": self._convert_live_params(params)
+            }
+        
+        # Update UI if we're viewing this track
+        if self.current_track == track_id:
+            self._update_device_info()
+            self._update_current_page_params()
 
-def _convert_live_params(self, live_params):
-    """Convert Live parameter format to our internal format"""
-    converted = []
-    for i, param in enumerate(live_params):
-        converted.append({
-            "name": param.get('name', f'Param {i+1}'),
-            "value": param.get('value', 0.5),
-            "display": param.get('display_value', '50%'),
-            "min": param.get('min', 0),
-            "max": param.get('max', 127),
-            "unit": param.get('unit', '')
-        })
-    return converted
+    def _convert_live_params(self, live_params):
+        """Convert Live parameter format to our internal format"""
+        converted = []
+        for i, param in enumerate(live_params):
+            converted.append({
+                "name": param.get('name', f'Param {i+1}'),
+                "value": param.get('value', 0.5),
+                "display": param.get('display_value', '50%'),
+                "min": param.get('min', 0),
+                "max": param.get('max', 127),
+                "unit": param.get('unit', '')
+            })
+        return converted
