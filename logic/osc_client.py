@@ -10,7 +10,7 @@ import socket
 class OSCClient:
     """OSC Client for bidirectional communication with Ableton Live"""
     
-    def __init__(self, send_host: str = "192.168.80.33", send_port: int = 11000, 
+    def __init__(self, send_host: str = "0.0.0.0", send_port: int = 11000, 
                  receive_port: int = 11001):
         self.send_host = send_host
         self.send_port = send_port

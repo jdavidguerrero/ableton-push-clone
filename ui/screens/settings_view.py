@@ -14,7 +14,7 @@ class SettingsViewScreen(Screen):
     midi_channel = NumericProperty(1)  # 1-16
     
     # OSC settings  
-    osc_ip = StringProperty("192.168.0.25")
+    osc_ip = StringProperty("192.168.80.33")
     osc_port = NumericProperty(11000)
     
     def __init__(self, **kwargs):
