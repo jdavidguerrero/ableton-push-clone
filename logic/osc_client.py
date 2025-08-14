@@ -135,11 +135,11 @@ class OSCClient:
     def _start_server(self):
         """Start OSC server in background thread"""
         try:
-            self.server = BlockingOSCUDPServer(("127.0.0.1", self.receive_port), self.dispatcher)
+            self.server = BlockingOSCUDPServer(("0.0.0.0", self.receive_port), self.dispatcher)
             self.server_thread = threading.Thread(target=self._run_server, daemon=True)
             self.server_thread.start()
             self.is_server_running = True
-            self.logger.info(f"OSC Server listening on port {self.receive_port}")
+            self.logger.info(f"OSC Server listening on all interfaces, port {self.receive_port}")
         except Exception as e:
             self.logger.error(f"Failed to start OSC server: {e}")
             raise
