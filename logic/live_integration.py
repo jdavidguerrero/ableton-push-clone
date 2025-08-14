@@ -11,6 +11,7 @@ class LiveIntegration:
         self.osc_client: Optional[OSCClient] = None
         self.logger = logging.getLogger(__name__)
         self.is_syncing = False
+        self.polling_enabled = True  # NUEVO
         
         self._setup_bus_listeners()
     
@@ -47,6 +48,10 @@ class LiveIntegration:
                 
                 # Request initial sync
                 self._request_initial_sync()
+                
+                # Start periodic polling
+                self._start_polling()
+                
                 return True
             else:
                 self.logger.error("Failed to connect to Ableton Live")
@@ -58,6 +63,7 @@ class LiveIntegration:
     
     def disconnect(self):
         """Disconnect from Live"""
+        self.polling_enabled = False  # Stop polling
         if self.osc_client:
             self.osc_client.disconnect()
             self.osc_client = None
@@ -86,6 +92,11 @@ class LiveIntegration:
         
         # Live responses
         self.osc_client.register_handler("/live/test", self._handle_live_test)
+
+        # NEW: Listeners para cambios en tiempo real
+        self.osc_client.register_handler("/live/song/track_added", self._handle_track_added)
+        self.osc_client.register_handler("/live/song/track_removed", self._handle_track_removed)
+        self.osc_client.register_handler("/live/song/changed", self._handle_song_changed)
 
     def _request_initial_sync(self):
         """Request all data from Live on connection"""
@@ -295,22 +306,25 @@ class LiveIntegration:
             self.logger.info(f"📋 Live has {len(track_names)} tracks: {track_names}")
             bus.emit("live:track_names", names=track_names)
             
-            # NOW request data for ALL existing tracks dynamically
-            num_tracks = len(track_names)
-            self.logger.info(f"📊 Requesting data for {num_tracks} tracks...")
+            # Initialize app state with real Live tracks
+            if self.app_state:
+                self.app_state.init_project_from_live(track_names)
             
+            # Request data for ALL tracks
+            num_tracks = len(track_names)
             for track_id in range(num_tracks):
-                # Start listening for volume changes
+                # Track data
                 self.osc_client.start_listen_track_volume(track_id)
-                
-                # Get current track data
                 self.osc_client.send_message(f"/live/track/get/volume", track_id)
                 self.osc_client.send_message(f"/live/track/get/name", track_id)
                 self.osc_client.send_message(f"/live/track/get/pan", track_id)
                 self.osc_client.send_message(f"/live/track/get/mute", track_id)
                 self.osc_client.send_message(f"/live/track/get/solo", track_id)
                 self.osc_client.send_message(f"/live/track/get/arm", track_id)
-            
+                
+                # Devices data
+                self.osc_client.send_message(f"/live/track/get/devices", track_id)
+                
             self.logger.info(f"✅ Sync complete for {num_tracks} tracks")
 
     def _handle_live_test(self, address: str, *args):
@@ -429,6 +443,33 @@ class LiveIntegration:
         self.logger.info(f"✅ Live test response: {args}")
         bus.emit("live:connection_confirmed")
     
+    def _handle_track_added(self, address: str, *args):
+        """Handle when a track is added in Live"""
+        self.logger.info("🆕 Track added in Live - refreshing...")
+        self._request_full_resync()
+
+    def _handle_track_removed(self, address: str, *args):
+        """Handle when a track is removed in Live"""
+        self.logger.info("🗑️ Track removed in Live - refreshing...")
+        self._request_full_resync()
+
+    def _handle_song_changed(self, address: str, *args):
+        """Handle general song structure changes"""
+        self.logger.info("🔄 Song structure changed in Live - refreshing...")
+        self._request_full_resync()
+
+    def _request_full_resync(self):
+        """Request a complete resync from Live"""
+        if self.osc_client:
+            self.logger.info("📡 Requesting full resync...")
+            self.is_syncing = True
+            
+            # Re-request track names (will trigger UI update)
+            self.osc_client.get_track_names()
+            
+            # Emit event so UI screens can refresh
+            bus.emit("live:structure_changed")
+    
     def get_status(self) -> dict:
         """Get integration status"""
         return {
@@ -436,3 +477,21 @@ class LiveIntegration:
             "syncing": self.is_syncing,
             "osc_info": self.osc_client.get_connection_info() if self.osc_client else {}
         }
+
+    def _start_polling(self):
+        """Start periodic polling for changes"""
+        import threading
+        import time
+        
+        def poll_loop():
+            while self.polling_enabled and self.osc_client and self.osc_client.is_connected:
+                try:
+                    # Poll track names every 5 seconds
+                    self.osc_client.get_track_names()
+                    time.sleep(5.0)
+                except Exception as e:
+                    self.logger.error(f"Polling error: {e}")
+                    break
+        
+        polling_thread = threading.Thread(target=poll_loop, daemon=True)
+        polling_thread.start()

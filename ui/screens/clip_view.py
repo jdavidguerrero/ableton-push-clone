@@ -34,6 +34,7 @@ class ClipViewScreen(Screen):
         bus.on("live:track_names", self._on_live_track_names)
         bus.on("live:clip_status", self._on_live_clip_status)
         bus.on("live:connection_confirmed", self._on_live_connected)
+        bus.on("live:structure_changed", self._on_structure_changed)  # NUEVO
     
     def on_enter(self):
         """Called when screen becomes active"""
@@ -251,3 +252,9 @@ class ClipViewScreen(Screen):
         """Handle Live connection confirmation"""
         self.logger.info("🎉 Live connection confirmed in ClipView!")
         # Optionally do something when Live connects
+
+    def _on_structure_changed(self, **kwargs):
+        """Handle Live structure changes (tracks added/removed)"""
+        self.logger.info("🔄 Live structure changed - refreshing UI...")
+        # Re-request data to update UI
+        self._request_live_data()

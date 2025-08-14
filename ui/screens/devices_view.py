@@ -122,6 +122,8 @@ class DevicesViewScreen(Screen):
         bus.on("encoder:push", self._on_encoder_push)
         bus.on("device:change", self._on_device_change)
         bus.on("track:focus", self._on_track_focus)
+        bus.on("live:track_names", self._on_live_track_names)  # NUEVO
+        bus.on("live:devices", self._on_live_devices)  # NUEVO
     
     def on_enter(self):
         """Called when screen becomes active"""
@@ -336,3 +338,28 @@ class DevicesViewScreen(Screen):
         # For now, it will just set the current_track and update the track name
         self.current_track = track_id
         self._update_track_info()
+
+def _on_live_track_names(self, **kwargs):
+    """Update track names from Live"""
+    names = kwargs.get('names', [])
+    self.track_names = names
+    self.total_tracks = len(names)
+    self._update_track_info()
+
+def _on_live_devices(self, **kwargs):
+    """Update device data from Live"""
+    track_id = kwargs.get('track', 0)
+    devices = kwargs.get('devices', [])
+    
+    # Update device mapping with real Live data
+    if track_id not in self.track_devices:
+        self.track_devices[track_id] = {}
+    
+    for device in devices:
+        device_name = device.get('name', 'Unknown')
+        params = device.get('parameters', [])
+        # Convert Live device data to our format
+        self.track_devices[track_id][device_name] = {
+            "pages": max(1, len(params) // 8),
+            "params": params
+        }
