@@ -240,3 +240,8 @@ class ClipViewScreen(Screen):
         if 0 <= track < len(self.demo_tracks) and 0 <= scene < len(self.demo_tracks[track]["clips"]):
             self.demo_tracks[track]["clips"][scene]["status"] = status
             self.logger.debug(f"Clip changed: T{track}S{scene} -> {status}")
+
+    def _on_live_connected(self, **kwargs):
+        """Handle Live connection confirmation"""
+        self.logger.info("🎉 Live connection confirmed in ClipView!")
+        # Optionally do something when Live connects
