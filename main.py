@@ -116,18 +116,18 @@ class PushControllerApp(App):
     def _init_business_logic(self):
         """Initialize state and business logic"""
         self.state = AppState()
-        self.state.init_project(tracks=8, scenes=12)
+        # Don't init_project here - let Live integration do it dynamically
         
         self.clip_manager = ClipManager(self.state)
-        
-        # Initialize Live integration
         self.live_integration = LiveIntegration(self.state)
         
-        # Try to connect (will fail gracefully if Live not running)
+        # Try to connect (will initialize tracks from Live)
         try:
             self.live_integration.connect()
         except Exception as e:
             self.logger.warning(f"Could not connect to Live on startup: {e}")
+            # Fallback to default if Live not available
+            self.state.init_project(tracks=8, scenes=12)
     
     def _setup_window(self):
         """Setup window events and properties"""

@@ -44,6 +44,26 @@ class AppState:
             
         self._emit("tracks_changed", tracks=self.m.tracks)
 
+    def init_project_from_live(self, track_names: list, scenes=12):
+        """Initialize project dynamically from Live track data"""
+        self.m.scenes_count = scenes
+        self.m.tracks = {}
+        
+        for track_id, track_name in enumerate(track_names):
+            # Create clips for this track
+            clips_dict = {s: ClipSlotState() for s in range(scenes)}
+            
+            # Create track with Live data
+            tr = TrackState(
+                id=track_id,
+                name=track_name,  # Real name from Live
+                clips=clips_dict
+            )
+            self.m.tracks[track_id] = tr
+            
+        self._emit("tracks_changed", tracks=self.m.tracks)
+        self.logger.info(f"✅ App state initialized with {len(track_names)} tracks from Live")
+
     def set_clip_status(self, track_id: int, scene_id: int, status: str):
         """Update clip status creating new immutable objects"""
         if track_id in self.m.tracks:

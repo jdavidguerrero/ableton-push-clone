@@ -18,7 +18,7 @@ class ClipSlotState:
     def is_playing(self) -> bool:
         return self.status == ClipStatus.PLAYING
 
-@dataclass(frozen=True)
+@dataclass
 class TrackState:
     id: int
     name: str

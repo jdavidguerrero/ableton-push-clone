@@ -92,19 +92,15 @@ class LiveIntegration:
         if self.osc_client:
             self.is_syncing = True
             
-            # Request song info
+            # First: Get track names to determine how many tracks exist
             self.osc_client.get_track_names()
-            self.osc_client.get_scene_names()
             self.osc_client.send_message("/live/song/get/tempo")
             
-            # Request track data for first 8 tracks
-            for track_id in range(8):
-                self.osc_client.start_listen_track_volume(track_id)
-                self.osc_client.send_message(f"/live/track/get/volume", track_id)
-                self.osc_client.send_message(f"/live/track/get/name", track_id)
-                
+            # NOTE: Don't request individual track data here
+            # We'll do it in _handle_track_names_response once we know the count
+            
             self.logger.info("Requesting initial sync from AbletonOSC")
-    
+
     # === OUTGOING (Push → Live) ===
     
     def _on_track_volume(self, **kwargs):
@@ -293,11 +289,29 @@ class LiveIntegration:
         bus.emit("live:sync_complete")
     
     def _handle_track_names_response(self, address: str, *args):
-        """Handle track names from Live"""
+        """Handle track names response from AbletonOSC"""
         if args:
-            track_names = args  # AbletonOSC sends track names as multiple args
-            self.logger.info(f"Live track names: {track_names}")
+            track_names = list(args)
+            self.logger.info(f"📋 Live has {len(track_names)} tracks: {track_names}")
             bus.emit("live:track_names", names=track_names)
+            
+            # NOW request data for ALL existing tracks dynamically
+            num_tracks = len(track_names)
+            self.logger.info(f"📊 Requesting data for {num_tracks} tracks...")
+            
+            for track_id in range(num_tracks):
+                # Start listening for volume changes
+                self.osc_client.start_listen_track_volume(track_id)
+                
+                # Get current track data
+                self.osc_client.send_message(f"/live/track/get/volume", track_id)
+                self.osc_client.send_message(f"/live/track/get/name", track_id)
+                self.osc_client.send_message(f"/live/track/get/pan", track_id)
+                self.osc_client.send_message(f"/live/track/get/mute", track_id)
+                self.osc_client.send_message(f"/live/track/get/solo", track_id)
+                self.osc_client.send_message(f"/live/track/get/arm", track_id)
+            
+            self.logger.info(f"✅ Sync complete for {num_tracks} tracks")
 
     def _handle_live_test(self, address: str, *args):
         """Handle test response from Live"""

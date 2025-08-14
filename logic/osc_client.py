@@ -255,6 +255,17 @@ class OSCClient:
     def _handle_any_message(self, address: str, *args):
         """Handle any incoming OSC message (catch-all)"""
         self.messages_received += 1
+        
+        # Handle errors more gracefully
+        if address == "/live/error" and args:
+            error_msg = args[0]
+            if "Index out of range" in error_msg:
+                self.logger.debug(f"🔍 Track index out of range (expected - Live has fewer tracks)")
+                return
+            else:
+                self.logger.warning(f"⚠️ Live error: {error_msg}")
+                return
+        
         self.logger.info(f"🌐 CAUGHT MESSAGE: {address} {args}")
         
         # Log raw info for debugging
