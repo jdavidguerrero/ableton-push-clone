@@ -32,7 +32,7 @@ class LiveIntegration:
         # Settings changes
         bus.on("settings:changed", self._on_settings_changed)
     
-    def connect(self, host: str = "127.0.0.1", send_port: int = 11000, 
+    def connect(self, host: str = "0.0.0.0", send_port: int = 11000, 
                 receive_port: int = 11001) -> bool:
         """Connect to Live via OSC"""
         try:

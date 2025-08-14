@@ -96,7 +96,7 @@ class OSCClient:
         """Check if a port is available"""
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
-                sock.bind(('127.0.0.1', port))
+                sock.bind(('0.0.0.0', port))
                 return True
         except OSError:
             return False
