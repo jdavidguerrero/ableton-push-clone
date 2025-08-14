@@ -26,32 +26,11 @@ class TrackVolume(BoxLayout):
         self._current_knob = None
 
     def _notify(self, what, value):
-        app = None
-        try:
-            from kivy.app import App
-            app = App.get_running_app()
-        except Exception:
-            return
-        if app and hasattr(app, "state"):
-            try:
-                if what == "volume":
-                    app.state.set_track_volume(self.track_index, float(value))
-                elif what == "pan":
-                    app.state.set_track_pan(self.track_index, float(value))
-                elif what == "send_a":
-                    app.state.set_track_send(self.track_index, "A", float(value))
-                elif what == "send_b":
-                    app.state.set_track_send(self.track_index, "B", float(value))
-                elif what == "send_c":
-                    app.state.set_track_send(self.track_index, "C", float(value))
-                elif what == "mute":
-                    app.state.set_track_mute(self.track_index, int(value))
-                elif what == "solo":
-                    app.state.set_track_solo(self.track_index, int(value))
-                elif what == "arm":
-                    app.state.set_track_arm(self.track_index, int(value))
-            except Exception:
-                pass
+        """Emit state changes to bus"""
+        bus.emit(f"track:{what}", track=self.track_index, value=value)
+        
+        # TAMBIÉN enviar directamente a Live si está conectado
+        bus.emit(f"mixer:{what}", track=self.track_index, value=value)
 
     # TOGGLE METHODS for SMA buttons
     def toggle_solo(self):

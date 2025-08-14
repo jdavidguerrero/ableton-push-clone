@@ -30,11 +30,13 @@ class ClipViewScreen(Screen):
         bus.on("track:focus", self._on_track_focus)
         bus.on("clip:changed", self._on_clip_changed)
         
-        # NUEVO: Listeners para datos de Live
+        # Live data listeners
         bus.on("live:track_names", self._on_live_track_names)
         bus.on("live:clip_status", self._on_live_clip_status)
+        bus.on("live:clip_name", self._on_live_clip_name)  # NEW
+        bus.on("live:track_color", self._on_live_track_color)  # NEW
         bus.on("live:connection_confirmed", self._on_live_connected)
-        bus.on("live:structure_changed", self._on_structure_changed)  # NUEVO
+        bus.on("live:structure_changed", self._on_structure_changed)
     
     def on_enter(self):
         """Called when screen becomes active"""
@@ -109,10 +111,10 @@ class ClipViewScreen(Screen):
         
         # Crear estructura de tracks con datos reales
         self.live_tracks = []
-        for i, name in enumerate(names):  # No limitar a 8
+        for i, name in enumerate(names):
             track = {
                 "name": name,
-                "color": self._get_track_color(i),
+                "color": self._get_track_color(i),  # Se actualizará con color real
                 "clips": [{"status": "empty", "name": ""} for _ in range(12)]
             }
             self.live_tracks.append(track)
@@ -121,7 +123,7 @@ class ClipViewScreen(Screen):
         self._populate_headers()
         self._populate_clips()
         
-        # AHORA solicitar clips para el número real de tracks
+        # AHORA solicitar clips con nombres para el número real de tracks
         osc = self.live_integration.osc_client
         for track_id in range(len(names)):
             for scene_id in range(12):
@@ -140,6 +142,30 @@ class ClipViewScreen(Screen):
             
             # Actualizar UI
             self._update_clip_visual(track, scene, status)
+
+    def _on_live_clip_name(self, **kwargs):
+        """Handle clip name updates from Live"""
+        track = kwargs.get('track', 0)
+        scene = kwargs.get('scene', 0) 
+        name = kwargs.get('name', '')
+        
+        self.logger.debug(f"📝 Clip name: T{track}S{scene} = '{name}'")
+        
+        # Actualizar datos locales
+        if (track < len(self.live_tracks) and 
+            scene < len(self.live_tracks[track]["clips"])):
+            self.live_tracks[track]["clips"][scene]["name"] = name
+            
+            # Actualizar UI si es necesario
+            self._update_clip_name_visual(track, scene, name)
+
+    def _update_clip_name_visual(self, track_id, scene_id, name):
+        """Update clip name in UI"""
+        # Encontrar el widget ClipSlot y actualizar su texto
+        if hasattr(self.ids, 'clips_container'):
+            # Buscar el slot específico y actualizar
+            # (implementación depende de cómo esté estructurada la UI)
+            pass
 
     def _get_track_color(self, track_index):
         """Get default color for track"""
@@ -258,3 +284,23 @@ class ClipViewScreen(Screen):
         self.logger.info("🔄 Live structure changed - refreshing UI...")
         # Re-request data to update UI
         self._request_live_data()
+
+    def _on_live_track_color(self, **kwargs):
+        """Handle track color updates from Live"""
+        track = kwargs.get('track', 0)
+        color = kwargs.get('color', (0.5, 0.5, 0.5, 1.0))
+        
+        # Actualizar color en datos locales
+        if track < len(self.live_tracks):
+            self.live_tracks[track]["color"] = color
+            
+            # Actualizar header visual
+            self._update_track_header_color(track, color)
+
+    def _update_track_header_color(self, track_id, color):
+        """Update track header color in UI"""
+        if hasattr(self.ids, 'track_headers_container'):
+            headers = self.ids.track_headers_container.children
+            if track_id < len(headers):
+                header = headers[-(track_id + 1)]  # Kivy reverses children
+                header.color_rgba = color

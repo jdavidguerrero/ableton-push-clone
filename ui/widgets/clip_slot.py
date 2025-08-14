@@ -21,20 +21,16 @@ class ClipSlot(BoxLayout):
         pass
 
     def trigger(self):
-        """Lanzar el clip con touch/click."""
-        app = None
-        try:
-            from kivy.app import App
-            app = App.get_running_app()
-        except Exception:
-            pass
+        """Trigger this clip slot"""
+        # Determinar acción basada en estado actual
+        if self.status == "empty":
+            # No hacer nada si está vacío
+            return
+        elif self.status == "playing":
+            # Si está reproduciéndose, detenerlo
+            bus.emit("clip:stop", track=self.track_index, scene=self.scene_index)
+        else:
+            # Si está detenido o en queue, reproducirlo
+            bus.emit("clip:trigger", track=self.track_index, scene=self.scene_index)
         
-        # Hook opcional: notificar a tu capa Ableton
-        if app and hasattr(app, "state"):
-            # Implementa en tu app: app.state.trigger_clip(track, scene)
-            try:
-                # Change status to show it's been triggered
-                self.status = "queued"
-                app.state.trigger_clip(self.track_index, self.scene_index)
-            except Exception:
-                pass
+        self.logger.debug(f"Clip slot triggered: T{self.track_index}S{self.scene_index}")

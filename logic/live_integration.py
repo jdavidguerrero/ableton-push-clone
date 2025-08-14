@@ -32,6 +32,12 @@ class LiveIntegration:
         
         # Settings changes
         bus.on("settings:changed", self._on_settings_changed)
+        
+        # NEW: Mixer control directo
+        bus.on("mixer:volume", self._on_mixer_volume)
+        bus.on("mixer:pan", self._on_mixer_pan)
+        bus.on("mixer:mute", self._on_mixer_mute)
+        bus.on("mixer:solo", self._on_mixer_solo)
     
     def connect(self, host: str = "192.168.80.33", send_port: int = 11000, 
                 receive_port: int = 11001) -> bool:
@@ -162,6 +168,7 @@ class LiveIntegration:
         if self.osc_client:
             track = kwargs.get('track', 0)
             scene = kwargs.get('scene', 0)
+            self.logger.info(f"🎵 Triggering clip T{track}S{scene}")
             self.osc_client.trigger_clip(track, scene)
     
     def _on_clip_stop(self, **kwargs):
@@ -169,6 +176,7 @@ class LiveIntegration:
         if self.osc_client:
             track = kwargs.get('track', 0)
             scene = kwargs.get('scene', 0)
+            self.logger.info(f"⏹️ Stopping clip T{track}S{scene}")
             self.osc_client.stop_clip(track, scene)
     
     def _on_track_stop(self, **kwargs):
@@ -322,6 +330,9 @@ class LiveIntegration:
                 self.osc_client.send_message(f"/live/track/get/solo", track_id)
                 self.osc_client.send_message(f"/live/track/get/arm", track_id)
                 
+                # NEW: Solicitar colores de tracks
+                self.osc_client.send_message(f"/live/track/get/color", track_id)
+                
                 # Devices data
                 self.osc_client.send_message(f"/live/track/get/devices", track_id)
                 
@@ -443,6 +454,18 @@ class LiveIntegration:
         self.logger.info(f"✅ Live test response: {args}")
         bus.emit("live:connection_confirmed")
     
+    def _handle_track_color_response(self, address: str, *args):
+        """Handle track color response from AbletonOSC"""
+        if len(args) >= 2:
+            track_id = int(args[0])
+            color_value = args[1]  # Puede ser RGB o índice de color
+            
+            # Convertir color de Live a RGBA
+            rgba_color = self._convert_live_color(color_value)
+            
+            bus.emit("live:track_color", track=track_id, color=rgba_color)
+            self.logger.debug(f"Live track color: Track {track_id} = {rgba_color}")
+
     def _handle_track_added(self, address: str, *args):
         """Handle when a track is added in Live"""
         self.logger.info("🆕 Track added in Live - refreshing...")
@@ -495,3 +518,30 @@ class LiveIntegration:
         
         polling_thread = threading.Thread(target=poll_loop, daemon=True)
         polling_thread.start()
+
+    def _convert_live_color(self, live_color):
+        """Convert Live color format to RGBA"""
+        if isinstance(live_color, (list, tuple)) and len(live_color) >= 3:
+            # Si Live envía RGB directamente
+            r, g, b = live_color[:3]
+            return (r/255.0, g/255.0, b/255.0, 1.0)
+        elif isinstance(live_color, int):
+            # Si Live envía índice de color, usar paleta de colores
+            live_colors = [
+                (1.0, 0.3, 0.3, 1.0),    # Rojo
+                (1.0, 0.6, 0.0, 1.0),    # Naranja
+                (1.0, 1.0, 0.0, 1.0),    # Amarillo
+                (0.5, 1.0, 0.0, 1.0),    # Verde claro
+                (0.0, 1.0, 0.0, 1.0),    # Verde
+                (0.0, 1.0, 0.5, 1.0),    # Verde agua
+                (0.0, 1.0, 1.0, 1.0),    # Cyan
+                (0.0, 0.5, 1.0, 1.0),    # Azul claro
+                (0.0, 0.0, 1.0, 1.0),    # Azul
+                (0.5, 0.0, 1.0, 1.0),    # Púrpura
+                (1.0, 0.0, 1.0, 1.0),    # Magenta
+                (1.0, 0.0, 0.5, 1.0),    # Rosa
+            ]
+            return live_colors[live_color % len(live_colors)]
+        else:
+            # Color por defecto
+            return (0.5, 0.5, 0.5, 1.0)
