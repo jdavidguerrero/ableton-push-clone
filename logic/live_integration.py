@@ -91,6 +91,8 @@ class LiveIntegration:
         # Clip updates from Live
         self.osc_client.register_handler("/live/clip/get/playing_status", self._handle_clip_status_response)
         self.osc_client.register_handler("/live/clip/get/name", self._handle_clip_name_response)
+        self.osc_client.register_handler("/live/clip/get/length", self._handle_clip_length_response)
+        self.osc_client.register_handler("/live/clip/get/has_audio_output", self._handle_clip_has_content_response)
         
         # Song-level info
         self.osc_client.register_handler("/live/song/get/tempo", self._handle_tempo_response)
@@ -330,8 +332,8 @@ class LiveIntegration:
                 self.osc_client.send_message(f"/live/track/get/solo", track_id)
                 self.osc_client.send_message(f"/live/track/get/arm", track_id)
                 
-                # NEW: Solicitar colores de tracks
-                self.osc_client.send_message(f"/live/track/get/color", track_id)
+                # Comentar línea 334:
+                # self.osc_client.send_message(f"/live/track/get/color", track_id)
                 
                 # Devices data
                 self.osc_client.send_message(f"/live/track/get/devices", track_id)
@@ -434,6 +436,25 @@ class LiveIntegration:
             scene_id = int(args[1])
             name = str(args[2])
             bus.emit("live:clip_name", track=track_id, scene=scene_id, name=name)
+    
+    def _handle_clip_length_response(self, address: str, *args):
+        """Handle clip length response from AbletonOSC"""
+        if len(args) >= 3:
+            track_id = int(args[0])
+            scene_id = int(args[1])
+            length = float(args[2]) if args[2] != -1 else 0  # -1 means no clip
+            
+            has_content = length > 0
+            bus.emit("live:clip_has_content", track=track_id, scene=scene_id, has_content=has_content, length=length)
+
+    def _handle_clip_has_content_response(self, address: str, *args):
+        """Handle clip has_audio_output response from AbletonOSC"""
+        if len(args) >= 3:
+            track_id = int(args[0])
+            scene_id = int(args[1])
+            has_content = bool(args[2])
+            
+            bus.emit("live:clip_has_content", track=track_id, scene=scene_id, has_content=has_content)
     
     def _handle_tempo_response(self, address: str, *args):
         """Handle tempo response from AbletonOSC"""

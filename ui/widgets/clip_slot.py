@@ -1,5 +1,5 @@
 from kivy.uix.boxlayout import BoxLayout
-from kivy.properties import NumericProperty, StringProperty
+from kivy.properties import NumericProperty, StringProperty, BooleanProperty
 from kivy.clock import Clock
 
 class ClipSlot(BoxLayout):
@@ -7,6 +7,7 @@ class ClipSlot(BoxLayout):
     scene_index = NumericProperty(0)
     status      = StringProperty("empty")  # empty|stopped|queued|playing
     label_text  = StringProperty("")
+    has_content = BooleanProperty(False)  # NUEVO: indica si el clip tiene contenido
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

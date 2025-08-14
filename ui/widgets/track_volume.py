@@ -1,6 +1,7 @@
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import NumericProperty, StringProperty, BooleanProperty
 from kivy.clock import Clock
+from logic.bus import bus  # AGREGAR ESTO
 import math
 
 class TrackVolume(BoxLayout):

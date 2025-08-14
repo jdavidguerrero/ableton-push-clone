@@ -9,8 +9,9 @@
     canvas.before:
         Color:
             rgba:
-                (0.25, 0.25, 0.25, 1) if self.status == "empty" else \
-                (0.35, 0.35, 0.35, 1) if self.status == "stopped" else \
+                (0.15, 0.15, 0.15, 1) if self.status == "empty" and not self.has_content else \
+                (0.35, 0.35, 0.35, 1) if self.status == "empty" and self.has_content else \
+                (0.45, 0.45, 0.45, 1) if self.status == "stopped" else \
                 (0.15, 0.50, 1.00, 1) if self.status == "queued"  else \
                 (0.00, 0.80, 0.35, 1) # playing
         Rectangle:

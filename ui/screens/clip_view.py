@@ -37,6 +37,7 @@ class ClipViewScreen(Screen):
         bus.on("live:track_color", self._on_live_track_color)  # NEW
         bus.on("live:connection_confirmed", self._on_live_connected)
         bus.on("live:structure_changed", self._on_structure_changed)
+        bus.on("live:clip_has_content", self._on_live_clip_has_content)  # NEW
     
     def on_enter(self):
         """Called when screen becomes active"""
@@ -129,6 +130,8 @@ class ClipViewScreen(Screen):
             for scene_id in range(12):
                 osc.send_message("/live/clip/get/playing_status", track_id, scene_id)
                 osc.send_message("/live/clip/get/name", track_id, scene_id)
+                osc.send_message("/live/clip/get/length", track_id, scene_id)  # NUEVO
+                osc.send_message("/live/clip/get/has_audio_output", track_id, scene_id)  # NUEVO
 
     def _on_live_clip_status(self, **kwargs):
         """Handle clip status updates from Live"""
@@ -166,6 +169,22 @@ class ClipViewScreen(Screen):
             # Buscar el slot específico y actualizar
             # (implementación depende de cómo esté estructurada la UI)
             pass
+
+    def _on_live_clip_has_content(self, **kwargs):
+        """Handle clip content updates from Live"""
+        track = kwargs.get('track', 0)
+        scene = kwargs.get('scene', 0) 
+        has_content = kwargs.get('has_content', False)
+        
+        self.logger.debug(f"📁 Clip content: T{track}S{scene} = {has_content}")
+        
+        # Actualizar datos locales
+        if (track < len(self.live_tracks) and 
+            scene < len(self.live_tracks[track]["clips"])):
+            self.live_tracks[track]["clips"][scene]["has_content"] = has_content
+            
+            # Actualizar visual del clip
+            self._update_clip_content_visual(track, scene, has_content)
 
     def _get_track_color(self, track_index):
         """Get default color for track"""
