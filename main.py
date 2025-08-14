@@ -168,26 +168,32 @@ class PushControllerApp(App):
         clip_view = ClipViewScreen(
             name='clip_view',
             app_state=self.state,
-            clip_manager=self.clip_manager
+            clip_manager=self.clip_manager,
+            live_integration=self.live_integration  # AGREGAR ESTO
         )
         sm.add_widget(clip_view)
         
         # NEW: Mixer View
         mixer_view = MixerViewScreen(
             name='mixer_view',
-            app_state=self.state
+            app_state=self.state,
+            live_integration=self.live_integration  # AGREGAR ESTO
         )
         sm.add_widget(mixer_view)
         
         # Devices View (updated index)
         devices_view = DevicesViewScreen(
             name='devices_view',
-            app_state=self.state
+            app_state=self.state,
+            live_integration=self.live_integration  # AGREGAR ESTO
         )
         sm.add_widget(devices_view)
         
         # Note View (updated index)
-        note_view = NoteViewScreen(name='note_view')
+        note_view = NoteViewScreen(
+            name='note_view',
+            live_integration=self.live_integration  # AGREGAR ESTO
+        )
         sm.add_widget(note_view)
         
         # Settings View (updated index)

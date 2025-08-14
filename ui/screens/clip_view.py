@@ -12,14 +12,16 @@ class ClipViewScreen(Screen):
     focused_track = NumericProperty(0)
     current_track_text = StringProperty("Kick")
     
-    def __init__(self, app_state=None, clip_manager=None, **kwargs):
+    def __init__(self, app_state=None, clip_manager=None, live_integration=None, **kwargs):
         super().__init__(**kwargs)
         self.app_state = app_state
         self.clip_manager = clip_manager
+        self.live_integration = live_integration  # NUEVO: Integración real
         self.logger = logging.getLogger(__name__)
         
-        # Initialize demo data
-        self.demo_tracks = self._create_demo_tracks()
+        # Datos de Live (reemplazan demo_tracks)
+        self.live_tracks = []
+        self.live_scenes = []
         
         # Setup event listeners
         self._setup_events()
@@ -28,17 +30,23 @@ class ClipViewScreen(Screen):
         """Setup event bus listeners"""
         bus.on("track:focus", self._on_track_focus)
         bus.on("clip:changed", self._on_clip_changed)
+        
+        # NUEVO: Listeners para datos de Live
+        bus.on("live:track_names", self._on_live_track_names)
+        bus.on("live:clip_status", self._on_live_clip_status)
+        bus.on("live:connection_confirmed", self._on_live_connected)
     
     def on_enter(self):
         """Called when screen becomes active"""
         self.logger.info("Entering Clip View")
         
-        # Populate components
-        self._populate_headers()
-        self._populate_clips()
-        
-        # Focus first track by default
-        self._focus_track(0)
+        if self.live_integration and self.live_integration.osc_client.is_connected:
+            # Usar datos reales de Live
+            self._request_live_data()
+        else:
+            # Fallback a datos demo si Live no conectado
+            self.logger.warning("Live not connected, using demo data")
+            self._use_demo_data()
     
     def _create_demo_tracks(self):
         """Create demo track data"""
@@ -69,15 +77,87 @@ class ClipViewScreen(Screen):
         
         return tracks
     
+    def _request_live_data(self):
+        """Request real data from Live"""
+        self.logger.info("📡 Requesting data from Live...")
+        
+        osc = self.live_integration.osc_client
+        
+        # Solicitar nombres de tracks
+        osc.send_message("/live/song/get/track_names")
+        
+        # Solicitar número de scenes
+        osc.send_message("/live/song/get/num_scenes")
+        
+        # Solicitar estados de clips (primeros 8 tracks x 12 scenes)
+        for track_id in range(8):
+            for scene_id in range(12):
+                osc.send_message("/live/clip/get/playing_status", track_id, scene_id)
+                osc.send_message("/live/clip/get/name", track_id, scene_id)
+
+    def _on_live_track_names(self, **kwargs):
+        """Handle track names from Live"""
+        names = kwargs.get('names', [])
+        self.logger.info(f"📋 Received track names from Live: {names}")
+        
+        # Crear estructura de tracks con datos reales
+        self.live_tracks = []
+        for i, name in enumerate(names[:8]):  # Máximo 8 tracks
+            track = {
+                "name": name,
+                "color": self._get_track_color(i),  # Colores por defecto
+                "clips": [{"status": "empty", "name": ""} for _ in range(12)]
+            }
+            self.live_tracks.append(track)
+        
+        # Poblar UI con datos reales
+        self._populate_headers()
+        self._populate_clips()
+
+    def _on_live_clip_status(self, **kwargs):
+        """Handle clip status updates from Live"""
+        track = kwargs.get('track', 0)
+        scene = kwargs.get('scene', 0)
+        status = kwargs.get('status', 'empty')
+        
+        # Actualizar datos locales
+        if track < len(self.live_tracks) and scene < len(self.live_tracks[track]["clips"]):
+            self.live_tracks[track]["clips"][scene]["status"] = status
+            
+            # Actualizar UI
+            self._update_clip_visual(track, scene, status)
+
+    def _get_track_color(self, track_index):
+        """Get default color for track"""
+        colors = [
+            (0, 0.016, 1, 1),      # Azul
+            (0, 1, 0.05, 1),       # Verde
+            (1, 0.6, 0, 1),        # Naranja
+            (1, 0.85, 0, 1),       # Amarillo
+            (1, 0, 0.48, 1),       # Rosa
+            (0, 1, 0.97, 1),       # Cyan
+            (1, 0.57, 0, 1),       # Naranja claro
+            (0.8, 0.2, 0.8, 1),    # Morado
+        ]
+        return colors[track_index % len(colors)]
+
+    def _use_demo_data(self):
+        """Fallback to demo data if Live not available"""
+        self.live_tracks = self._create_demo_tracks()
+        self._populate_headers()
+        self._populate_clips()
+
     def _populate_headers(self):
-        """Create track headers"""
+        """Create track headers with real data"""
         from ui.widgets.track_header import TrackHeader
         
         if hasattr(self.ids, 'track_headers_container'):
             headers_container = self.ids.track_headers_container
             headers_container.clear_widgets()
             
-            for track_idx, track in enumerate(self.demo_tracks):
+            tracks_to_use = self.live_tracks if self.live_tracks else self._create_demo_tracks()
+            
+            for track_idx, track in enumerate(tracks_to_use):
                 header = TrackHeader(
                     track_index=track_idx,
                     track_name=track["name"],
@@ -85,7 +165,7 @@ class ClipViewScreen(Screen):
                 )
                 headers_container.add_widget(header)
             
-            headers_container.width = len(self.demo_tracks) * 88
+            headers_container.width = len(tracks_to_use) * 88
     
     def _populate_clips(self):
         """Create clips grid"""
