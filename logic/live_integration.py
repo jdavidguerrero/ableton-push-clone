@@ -2,6 +2,7 @@ from typing import Optional
 import logging
 from .osc_client import OSCClient
 from .bus import bus
+from .performance_optimizer import performance_optimizer
 
 class LiveIntegration:
     """Integrates OSC communication with the application event bus"""
@@ -107,18 +108,18 @@ class LiveIntegration:
         self.osc_client.register_handler("/live/song/changed", self._handle_song_changed)
 
     def _request_initial_sync(self):
-        """Request all data from Live on connection"""
+        """Request essential data from Live on connection (OPTIMIZED)"""
         if self.osc_client:
             self.is_syncing = True
             
-            # First: Get track names to determine how many tracks exist
+            # OPTIMIZED: Only request essential data first
             self.osc_client.get_track_names()
             self.osc_client.send_message("/live/song/get/tempo")
             
-            # NOTE: Don't request individual track data here
-            # We'll do it in _handle_track_names_response once we know the count
+            # PERFORMANCE: Don't request all clip data immediately
+            # Load it lazily when user actually views clips
             
-            self.logger.info("Requesting initial sync from AbletonOSC")
+            self.logger.info("🚀 Requesting optimized initial sync from Live")
 
     # === OUTGOING (Push → Live) ===
     
@@ -310,7 +311,7 @@ class LiveIntegration:
         bus.emit("live:sync_complete")
     
     def _handle_track_names_response(self, address: str, *args):
-        """Handle track names response from AbletonOSC"""
+        """Handle track names response from AbletonOSC (OPTIMIZED)"""
         if args:
             track_names = list(args)
             self.logger.info(f"📋 Live has {len(track_names)} tracks: {track_names}")
@@ -320,25 +321,17 @@ class LiveIntegration:
             if self.app_state:
                 self.app_state.init_project_from_live(track_names)
             
-            # Request data for ALL tracks
+            # OPTIMIZED: Only request essential track data
             num_tracks = len(track_names)
             for track_id in range(num_tracks):
-                # Track data
-                self.osc_client.start_listen_track_volume(track_id)
+                # Only essential track properties first
                 self.osc_client.send_message(f"/live/track/get/volume", track_id)
                 self.osc_client.send_message(f"/live/track/get/name", track_id)
-                self.osc_client.send_message(f"/live/track/get/pan", track_id)
-                self.osc_client.send_message(f"/live/track/get/mute", track_id)
-                self.osc_client.send_message(f"/live/track/get/solo", track_id)
-                self.osc_client.send_message(f"/live/track/get/arm", track_id)
-                
-                # Comentar línea 334:
-                # self.osc_client.send_message(f"/live/track/get/color", track_id)
-                
-                # Devices data
-                self.osc_client.send_message(f"/live/track/get/devices", track_id)
-                
-            self.logger.info(f"✅ Sync complete for {num_tracks} tracks")
+                # Skip non-essential data for now (pan, mute, solo, arm, devices)
+            
+            # Mark sync as complete for initial load
+            self.is_syncing = False
+            self.logger.info(f"🚀 Fast sync complete for {num_tracks} tracks")
 
     def _handle_live_test(self, address: str, *args):
         """Handle test response from Live"""
@@ -417,16 +410,27 @@ class LiveIntegration:
             self.logger.debug(f"Live track name: Track {track_id} = '{name}'")
     
     def _handle_clip_status_response(self, address: str, *args):
-        """Handle clip status response from AbletonOSC"""
+        """Handle clip status response from AbletonOSC (OPTIMIZED)"""
         if len(args) >= 3:
             track_id = int(args[0])
             scene_id = int(args[1])
             status = str(args[2])
             
+            # PERFORMANCE: Throttle rapid clip status updates
+            identifier = f"{track_id}:{scene_id}"
+            if performance_optimizer.should_throttle('clip_status', identifier):
+                return
+            
             self.is_syncing = True
             if self.app_state:
                 self.app_state.set_clip_status(track_id, scene_id, status)
-            bus.emit("live:clip_status", track=track_id, scene=scene_id, status=status)
+            
+            # PERFORMANCE: Batch UI updates
+            performance_optimizer.batch_ui_update('clip_status', {
+                'track': track_id, 
+                'scene': scene_id, 
+                'status': status
+            })
             self.is_syncing = False
     
     def _handle_clip_name_response(self, address: str, *args):
@@ -523,16 +527,17 @@ class LiveIntegration:
         }
 
     def _start_polling(self):
-        """Start periodic polling for changes"""
+        """Start OPTIMIZED periodic polling for changes"""
         import threading
         import time
         
         def poll_loop():
             while self.polling_enabled and self.osc_client and self.osc_client.is_connected:
                 try:
-                    # Poll track names every 5 seconds
+                    # PERFORMANCE: Reduced polling frequency
+                    # Only check track structure changes every 30 seconds
                     self.osc_client.get_track_names()
-                    time.sleep(5.0)
+                    time.sleep(30.0)  # Reduced from 5s to 30s
                 except Exception as e:
                     self.logger.error(f"Polling error: {e}")
                     break

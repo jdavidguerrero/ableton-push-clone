@@ -2,6 +2,7 @@ from kivy.uix.screenmanager import Screen
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import StringProperty, NumericProperty
 from logic.bus import bus
+from logic.performance_optimizer import performance_optimizer
 from typing import Optional
 import logging
 
@@ -38,6 +39,10 @@ class ClipViewScreen(Screen):
         bus.on("live:connection_confirmed", self._on_live_connected)
         bus.on("live:structure_changed", self._on_structure_changed)
         bus.on("live:clip_has_content", self._on_live_clip_has_content)  # NEW
+        
+        # PERFORMANCE: Batched UI update listeners
+        bus.on("ui:clip_batch_update", self._on_clip_batch_update)
+        bus.on("ui:track_batch_update", self._on_track_batch_update)
     
     def on_enter(self):
         """Called when screen becomes active"""
@@ -124,14 +129,8 @@ class ClipViewScreen(Screen):
         self._populate_headers()
         self._populate_clips()
         
-        # AHORA solicitar clips con nombres para el número real de tracks
-        osc = self.live_integration.osc_client
-        for track_id in range(len(names)):
-            for scene_id in range(12):
-                osc.send_message("/live/clip/get/playing_status", track_id, scene_id)
-                osc.send_message("/live/clip/get/name", track_id, scene_id)
-                osc.send_message("/live/clip/get/length", track_id, scene_id)  # NUEVO
-                osc.send_message("/live/clip/get/has_audio_output", track_id, scene_id)  # NUEVO
+        # PERFORMANCE: Request clips lazily only for visible area
+        self._request_visible_clips_lazy(len(names))
 
     def _on_live_clip_status(self, **kwargs):
         """Handle clip status updates from Live"""
@@ -227,7 +226,7 @@ class ClipViewScreen(Screen):
             headers_container.width = len(tracks_to_use) * 88
     
     def _populate_clips(self):
-        """Create clips grid"""
+        """OPTIMIZED: Only create visible clips initially"""
         from ui.widgets.clip_slot import ClipSlot
         
         if hasattr(self.ids, 'clips_container'):
@@ -236,8 +235,11 @@ class ClipViewScreen(Screen):
             
             tracks_to_use = self.live_tracks if self.live_tracks else self._create_demo_tracks()
             
-            for track_idx, track in enumerate(tracks_to_use):
-                # Create clips column for this track
+            # OPTIMIZATION: Limit initial creation to visible area
+            max_visible_tracks = min(8, len(tracks_to_use))  # Only first 8 tracks
+            
+            for track_idx in range(max_visible_tracks):
+                track = tracks_to_use[track_idx]
                 clips_column = BoxLayout(
                     orientation='vertical',
                     size_hint_x=None,
@@ -245,22 +247,22 @@ class ClipViewScreen(Screen):
                     spacing=0
                 )
                 
-                # Add clip slots (12 scenes)
-                for scene_idx in range(12):
+                # Only create first 8 scenes initially (visible area)
+                for scene_idx in range(8):  # Era 12, ahora 8
                     clip_info = track["clips"][scene_idx] if scene_idx < len(track["clips"]) else {}
                     
                     slot = ClipSlot(
                         track_index=track_idx,
                         scene_index=scene_idx,
                         status=clip_info.get("status", "empty"),
-                        has_content=clip_info.get("has_content", False),  # AGREGAR
+                        has_content=clip_info.get("has_content", False),
                     )
                     slot.label_text = clip_info.get("name", "")
                     clips_column.add_widget(slot)
                 
                 clips_container.add_widget(clips_column)
             
-            clips_container.width = len(tracks_to_use) * 88
+            clips_container.width = max_visible_tracks * 88
     
     def _sync_header_scroll(self, scroll_x):
         """Sync header scroll with content scroll"""

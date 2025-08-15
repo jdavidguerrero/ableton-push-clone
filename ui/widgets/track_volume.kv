@@ -22,15 +22,14 @@
     
     # Track Name Header - WITH REAL NAMES
     Label:
-        text: root.track_name if root.track_name else f"Track {root.track_index + 1}"
-        size_hint_y: None
-        height: dp(16)  # Smaller height
-        font_size: dp(9)   # Smaller font to fit names
-        bold: True
+        text: root.track_name if root.track_name else f"T{root.track_index + 1}"
+        pos: root.x, root.top - dp(20)
+        size: root.width, dp(15)
+        font_size: dp(9)
         color: 1, 1, 1, 1
         halign: 'center'
         valign: 'middle'
-        text_size: self.size  # Enable text wrapping
+        text_size: self.size
     
     # SMA Buttons Row - SMALLER
     BoxLayout:

@@ -230,8 +230,9 @@ class OSCClient:
         def wrapped_handler(address: str, *args):
             try:
                 self.messages_received += 1
-                # CAMBIAR DEBUG POR INFO para ver los mensajes
-                self.logger.info(f"📥 OSC RECEIVED: {address} {args}")
+                # PERFORMANCE: Reduce logging overhead in production
+                if self.logger.isEnabledFor(logging.DEBUG):
+                    self.logger.debug(f"📥 OSC RECEIVED: {address} {args}")
                 handler(address, *args)
             except Exception as e:
                 self.logger.error(f"Error in OSC handler {pattern}: {e}")
